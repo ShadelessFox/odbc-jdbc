@@ -20,6 +20,7 @@ public interface OdbcLibrary extends Library {
     short SQL_SUCCESS = 0;
     short SQL_SUCCESS_WITH_INFO = 1;
     short SQL_NO_DATA = 100;
+    short SQL_NULL_DATA = -1;
 
     short SQL_TRUE = 1;
     short SQL_FALSE = 0;
@@ -89,6 +90,8 @@ public interface OdbcLibrary extends Library {
     short SQLNumParams(Pointer StatementHandle, ShortByReference ParameterCountPtr);
 
     short SQLNumResultCols(Pointer StatementHandle, ShortByReference ColumnCount);
+
+    short SQLColAttributeA(Pointer StatementHandle, short ColumnNumber, short FieldIdentifier, Pointer CharacterAttributePtr, short BufferLength, ShortByReference StringLengthPtr, IntByReference NumericAttributePtr);
 
     short SQLColAttributeW(Pointer StatementHandle, short ColumnNumber, short FieldIdentifier, Pointer CharacterAttributePtr, short BufferLength, ShortByReference StringLengthPtr, IntByReference NumericAttributePtr);
 

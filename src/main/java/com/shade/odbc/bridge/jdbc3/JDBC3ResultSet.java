@@ -31,7 +31,10 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
         ensureColumn(columnIndex);
         final Memory memory = new Memory(1024);
         final IntByReference length = new IntByReference();
-        OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, OdbcLibrary.SQL_WCHAR, memory, (int) (memory.size() - 1), length);
+        OdbcException.check("SQLGetData", OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, OdbcLibrary.SQL_WCHAR, memory, (int) (memory.size() - 1), length), getStatement().getHandle());
+        if (length.getValue() == OdbcLibrary.SQL_NULL_DATA) {
+            return null;
+        }
         if (length.getValue() > memory.size() - 1) {
             throw new SQLException("Value is too long");
         }
