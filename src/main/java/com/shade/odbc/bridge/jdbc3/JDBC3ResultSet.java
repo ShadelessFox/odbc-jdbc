@@ -5,9 +5,11 @@ import com.shade.odbc.bridge.OdbcStatement;
 import com.shade.odbc.wrapper.OdbcException;
 import com.shade.odbc.wrapper.OdbcLibrary;
 import com.shade.util.NotNull;
+import com.shade.util.Nullable;
 import com.sun.jna.Memory;
-import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.ptr.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -15,50 +17,88 @@ import java.net.URL;
 import java.sql.*;
 import java.util.Calendar;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet {
+    private boolean wasNull;
+
     public JDBC3ResultSet(@NotNull OdbcStatement statement) throws OdbcException {
         super(statement);
     }
 
     @Override
-    public boolean wasNull() throws SQLException {
-        throw new SQLFeatureNotSupportedException("wasNull");
+    public String getString(String columnLabel) throws SQLException {
+        return getString(getMetaData().getColumnIndex(columnLabel));
     }
 
     @Override
     public String getString(int columnIndex) throws SQLException {
-        ensureColumn(columnIndex);
-        final Memory memory = new Memory(1024);
-        final IntByReference length = new IntByReference();
-        OdbcException.check("SQLGetData", OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, OdbcLibrary.SQL_WCHAR, memory, (int) (memory.size() - 1), length), getStatement().getHandle());
-        if (length.getValue() == OdbcLibrary.SQL_NULL_DATA) {
-            return null;
-        }
-        if (length.getValue() > memory.size() - 1) {
-            throw new SQLException("Value is too long");
-        }
-        return memory.getWideString(0);
+        final StringBuilder result = getVariableLengthData(columnIndex, OdbcLibrary.SQL_WCHAR, StringBuilder::new, (mem, len) -> mem.getWideString(0), StringBuilder::append);
+        return result != null ? result.toString() : null;
+    }
+
+    @Override
+    public byte[] getBytes(String columnLabel) throws SQLException {
+        return getBytes(getMetaData().getColumnIndex(columnLabel));
+    }
+
+    @Override
+    public byte[] getBytes(int columnIndex) throws SQLException {
+        final ByteArrayOutputStream result = getVariableLengthData(columnIndex, OdbcLibrary.SQL_BINARY, ByteArrayOutputStream::new, (mem, len) -> mem.getByteArray(0, len), ByteArrayOutputStream::writeBytes);
+        return result != null ? result.toByteArray() : null;
+    }
+
+    @Override
+    public boolean getBoolean(String columnLabel) throws SQLException {
+        return getBoolean(getMetaData().getColumnIndex(columnLabel));
     }
 
     @Override
     public boolean getBoolean(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getBoolean");
+        // TODO: Handle string representation
+        final Byte result = getData(columnIndex, OdbcLibrary.SQL_C_TINYINT, ByteByReference::new, ByteByReference::getValue);
+        return result != null && result > 0;
+    }
+
+    @Override
+    public byte getByte(String columnLabel) throws SQLException {
+        return getByte(getMetaData().getColumnIndex(columnLabel));
     }
 
     @Override
     public byte getByte(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getByte");
+        final Byte result = getData(columnIndex, OdbcLibrary.SQL_C_TINYINT, ByteByReference::new, ByteByReference::getValue);
+        return result != null ? result : 0;
+    }
+
+    @Override
+    public short getShort(String columnLabel) throws SQLException {
+        return getShort(getMetaData().getColumnIndex(columnLabel));
     }
 
     @Override
     public short getShort(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getShort");
+        final Short result = getData(columnIndex, OdbcLibrary.SQL_C_SHORT, ShortByReference::new, ShortByReference::getValue);
+        return result != null ? result : 0;
+    }
+
+    @Override
+    public int getInt(String columnLabel) throws SQLException {
+        return getInt(getMetaData().getColumnIndex(columnLabel));
     }
 
     @Override
     public int getInt(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getInt");
+        final Integer result = getData(columnIndex, OdbcLibrary.SQL_C_LONG, IntByReference::new, IntByReference::getValue);
+        return result != null ? result : 0;
+    }
+
+    @Override
+    public long getLong(String columnLabel) throws SQLException {
+        return getLong(getMetaData().getColumnIndex(columnLabel));
     }
 
     @Override
@@ -67,23 +107,30 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     }
 
     @Override
+    public float getFloat(String columnLabel) throws SQLException {
+        return getFloat(getMetaData().getColumnIndex(columnLabel));
+    }
+
+    @Override
     public float getFloat(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getFloat");
+        final Float result = getData(columnIndex, OdbcLibrary.SQL_C_FLOAT, FloatByReference::new, FloatByReference::getValue);
+        return result != null ? result : 0.0f;
+    }
+
+    @Override
+    public double getDouble(String columnLabel) throws SQLException {
+        return getDouble(getMetaData().getColumnIndex(columnLabel));
     }
 
     @Override
     public double getDouble(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getDouble");
+        final Double result = getData(columnIndex, OdbcLibrary.SQL_C_DOUBLE, DoubleByReference::new, DoubleByReference::getValue);
+        return result != null ? result : 0.0;
     }
 
     @Override
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
         throw new SQLFeatureNotSupportedException("getBigDecimal");
-    }
-
-    @Override
-    public byte[] getBytes(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getBytes");
     }
 
     @Override
@@ -117,53 +164,8 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     }
 
     @Override
-    public String getString(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getString");
-    }
-
-    @Override
-    public boolean getBoolean(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getBoolean");
-    }
-
-    @Override
-    public byte getByte(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getByte");
-    }
-
-    @Override
-    public short getShort(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getShort");
-    }
-
-    @Override
-    public int getInt(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getInt");
-    }
-
-    @Override
-    public long getLong(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getLong");
-    }
-
-    @Override
-    public float getFloat(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getFloat");
-    }
-
-    @Override
-    public double getDouble(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getDouble");
-    }
-
-    @Override
     public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException {
         throw new SQLFeatureNotSupportedException("getBigDecimal");
-    }
-
-    @Override
-    public byte[] getBytes(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getBytes");
     }
 
     @Override
@@ -707,6 +709,11 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     }
 
     @Override
+    public boolean wasNull() {
+        return wasNull;
+    }
+
+    @Override
     public boolean isWrapperFor(Class<?> iface) {
         return iface.isInstance(this);
     }
@@ -714,5 +721,48 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     @Override
     public <T> T unwrap(Class<T> iface) {
         return iface.cast(this);
+    }
+
+    @Nullable
+    private <T extends ByReference, R> R getData(int columnIndex, short targetType, @NotNull Supplier<T> supplier, @NotNull Function<T, R> extractor) throws SQLException {
+        ensureOpen();
+        ensureColumn(columnIndex);
+
+        final T container = supplier.get();
+        final IntByReference length = new IntByReference();
+
+        OdbcException.check("SQLGetData", OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, targetType, container, 0, length), getStatement().getHandle());
+
+        if (length.getValue() == OdbcLibrary.SQL_NULL_DATA) {
+            wasNull = true;
+            return null;
+        }
+
+        wasNull = false;
+        return extractor.apply(container);
+    }
+
+    @Nullable
+    private <T, R> R getVariableLengthData(int columnIndex, short targetType, @NotNull Supplier<R> supplier, @NotNull BiFunction<Memory, Integer, T> extractor, @NotNull BiConsumer<R, T> accumulator) throws SQLException {
+        ensureOpen();
+        ensureColumn(columnIndex);
+
+        final Memory buffer = new Memory(1024);
+        final IntByReference length = new IntByReference();
+        final R result = supplier.get();
+
+        do {
+            OdbcException.check("SQLGetData", OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, targetType, buffer, (int) (buffer.size() - 1), length), getStatement().getHandle());
+
+            if (length.getValue() == OdbcLibrary.SQL_NULL_DATA) {
+                wasNull = true;
+                return null;
+            }
+
+            accumulator.accept(result, extractor.apply(buffer, length.getValue()));
+        } while (length.getValue() > buffer.size() - 1);
+
+        wasNull = false;
+        return result;
     }
 }

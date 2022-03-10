@@ -5,7 +5,6 @@ import com.shade.odbc.wrapper.OdbcLibrary;
 import com.shade.util.NotNull;
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 public abstract class OdbcResultSet implements ResultSet {
@@ -28,7 +27,7 @@ public abstract class OdbcResultSet implements ResultSet {
     }
 
     @Override
-    public ResultSetMetaData getMetaData() throws SQLException {
+    public OdbcResultSetMetaData getMetaData() throws SQLException {
         ensureOpen();
         return metaData;
     }

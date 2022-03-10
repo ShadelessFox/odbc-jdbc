@@ -11,19 +11,33 @@ import com.sun.jna.ptr.ShortByReference;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OdbcResultSetMetaData implements ResultSetMetaData {
     private final ColumnMetaData[] columns;
+    private final Map<String, Integer> indexes;
 
     public OdbcResultSetMetaData(@NotNull OdbcStatement statement) throws OdbcException {
         final ShortByReference count = new ShortByReference();
         OdbcException.check("SQLNumResultCols", OdbcLibrary.INSTANCE.SQLNumResultCols(statement.getHandle().getPointer(), count), statement.getHandle());
 
         this.columns = new ColumnMetaData[count.getValue()];
+        this.indexes = new HashMap<>(columns.length);
 
         for (int index = 0; index < columns.length; index++) {
-            columns[index] = new ColumnMetaData(statement.getHandle(), (short) (index + 1));
+            final ColumnMetaData meta = new ColumnMetaData(statement.getHandle(), (short) (index + 1));
+            columns[index] = meta;
+            indexes.put(meta.label, index + 1);
         }
+    }
+
+    public int getColumnIndex(@NotNull String label) throws SQLException {
+        final Integer index = indexes.get(label);
+        if (index == null) {
+            throw new SQLException("Column '" + label + "' is not present in result set meta data");
+        }
+        return index;
     }
 
     @Override
