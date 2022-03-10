@@ -52,13 +52,8 @@ public abstract class OdbcStatement implements Statement {
     }
 
     @Override
-    public void close() throws SQLException {
-        if (isClosed()) {
-            return;
-        }
-        cancel();
-        resultSet.close();
-        handle.close();
+    public void close() {
+        System.out.println("TODO: implement OdbcStatement#close");
     }
 
     @Override

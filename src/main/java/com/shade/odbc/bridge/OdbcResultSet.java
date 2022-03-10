@@ -43,13 +43,8 @@ public abstract class OdbcResultSet implements ResultSet {
     }
 
     @Override
-    public void close() throws SQLException {
-        if (closed) {
-            return;
-        }
-
-        closed = true;
-        statement.cancel();
+    public void close() {
+        System.out.println("TODO: implement OdbcResultSet#close");
     }
 
     public void ensureOpen() throws SQLException {
