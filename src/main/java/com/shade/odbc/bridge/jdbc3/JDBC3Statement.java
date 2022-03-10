@@ -2,6 +2,7 @@ package com.shade.odbc.bridge.jdbc3;
 
 import com.shade.odbc.bridge.OdbcConnection;
 import com.shade.odbc.bridge.OdbcStatement;
+import com.shade.odbc.wrapper.OdbcException;
 import com.shade.util.NotNull;
 
 import java.sql.*;
@@ -11,7 +12,7 @@ public abstract class JDBC3Statement extends OdbcStatement implements Statement 
     private final int resultSetConcurrency;
     private final int resultSetHoldability;
 
-    public JDBC3Statement(@NotNull OdbcConnection connection, int resultSetType, int resultSetConcurrency, int resultSetHoldability) {
+    public JDBC3Statement(@NotNull OdbcConnection connection, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws OdbcException {
         super(connection);
         this.resultSetType = resultSetType;
         this.resultSetConcurrency = resultSetConcurrency;
@@ -20,7 +21,10 @@ public abstract class JDBC3Statement extends OdbcStatement implements Statement 
 
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
-        throw new SQLFeatureNotSupportedException("executeQuery");
+        if (!execute(sql)) {
+            throw new SQLException("Query does not produce any results");
+        }
+        return getResultSet();
     }
 
     @Override
@@ -40,7 +44,8 @@ public abstract class JDBC3Statement extends OdbcStatement implements Statement 
 
     @Override
     public boolean execute(String sql) throws SQLException {
-        throw new SQLFeatureNotSupportedException("execute");
+        getConnection().ensureOpen();
+        return exec(sql);
     }
 
     @Override
@@ -131,7 +136,7 @@ public abstract class JDBC3Statement extends OdbcStatement implements Statement 
     @Override
     public ResultSet getResultSet() throws SQLException {
         getConnection().ensureOpen();
-        throw new SQLFeatureNotSupportedException("getResultSet");
+        return resultSet;
     }
 
     @Override
@@ -200,10 +205,5 @@ public abstract class JDBC3Statement extends OdbcStatement implements Statement 
     @Override
     public void setPoolable(boolean poolable) throws SQLException {
         throw new SQLFeatureNotSupportedException("setPoolable");
-    }
-
-    @Override
-    public void cancel() throws SQLException {
-        throw new SQLFeatureNotSupportedException("cancel");
     }
 }

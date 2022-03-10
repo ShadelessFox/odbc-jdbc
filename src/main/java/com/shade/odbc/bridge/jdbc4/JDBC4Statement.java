@@ -2,13 +2,14 @@ package com.shade.odbc.bridge.jdbc4;
 
 import com.shade.odbc.bridge.OdbcConnection;
 import com.shade.odbc.bridge.jdbc3.JDBC3Statement;
+import com.shade.odbc.wrapper.OdbcException;
 import com.shade.util.NotNull;
 
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
 public class JDBC4Statement extends JDBC3Statement {
-    public JDBC4Statement(@NotNull OdbcConnection connection, int resultSetType, int resultSetConcurrency, int resultSetHoldability) {
+    public JDBC4Statement(@NotNull OdbcConnection connection, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws OdbcException {
         super(connection, resultSetType, resultSetConcurrency, resultSetHoldability);
     }
 

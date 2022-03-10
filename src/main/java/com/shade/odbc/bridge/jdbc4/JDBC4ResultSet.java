@@ -2,6 +2,7 @@ package com.shade.odbc.bridge.jdbc4;
 
 import com.shade.odbc.bridge.OdbcStatement;
 import com.shade.odbc.bridge.jdbc3.JDBC3ResultSet;
+import com.shade.odbc.wrapper.OdbcException;
 import com.shade.util.NotNull;
 
 import java.io.InputStream;
@@ -9,7 +10,7 @@ import java.io.Reader;
 import java.sql.*;
 
 public class JDBC4ResultSet extends JDBC3ResultSet {
-    public JDBC4ResultSet(@NotNull OdbcStatement statement) {
+    public JDBC4ResultSet(@NotNull OdbcStatement statement) throws OdbcException {
         super(statement);
     }
 

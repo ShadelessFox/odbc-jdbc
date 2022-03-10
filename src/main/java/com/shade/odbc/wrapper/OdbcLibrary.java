@@ -19,6 +19,10 @@ public interface OdbcLibrary extends Library {
 
     short SQL_SUCCESS = 0;
     short SQL_SUCCESS_WITH_INFO = 1;
+    short SQL_NO_DATA = 100;
+
+    short SQL_TRUE = 1;
+    short SQL_FALSE = 0;
 
     short SQL_WCHAR = -8;
     short SQL_WVARCHAR = -9;
@@ -36,6 +40,25 @@ public interface OdbcLibrary extends Library {
 
     short SQL_COMMIT = 0;
     short SQL_ROLLBACK = 1;
+
+    short SQL_COLUMN_UNSIGNED = 8;
+    short SQL_COLUMN_MONEY = 9;
+    short SQL_COLUMN_UPDATABLE = 10;
+    short SQL_COLUMN_AUTO_INCREMENT = 11;
+    short SQL_COLUMN_CASE_SENSITIVE = 12;
+    short SQL_COLUMN_SEARCHABLE = 13;
+    short SQL_COLUMN_TYPE_NAME = 14;
+    short SQL_COLUMN_TABLE_NAME = 15;
+    short SQL_COLUMN_SCHEMA_NAME = 16;
+    short SQL_COLUMN_CATALOG_NAME = 17;
+    short SQL_COLUMN_LABEL = 18;
+
+    short SQL_DESC_TYPE = 1002;
+    short SQL_DESC_LENGTH = 1003;
+    short SQL_DESC_PRECISION = 1005;
+    short SQL_DESC_SCALE = 1006;
+    short SQL_DESC_NULLABLE = 1008;
+    short SQL_DESC_NAME = 1011;
 
     int SQL_OV_ODBC3 = 3;
 

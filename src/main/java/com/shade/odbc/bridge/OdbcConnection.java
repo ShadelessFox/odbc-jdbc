@@ -121,6 +121,11 @@ public abstract class OdbcConnection implements Connection {
         return iface.cast(this);
     }
 
+    @NotNull
+    public OdbcHandle getHandle() {
+        return handle;
+    }
+
     public void ensureOpen() throws SQLException {
         if (isClosed()) {
             throw new SQLException("Connection is closed");

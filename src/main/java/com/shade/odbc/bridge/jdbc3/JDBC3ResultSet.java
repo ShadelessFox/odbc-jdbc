@@ -1,7 +1,12 @@
 package com.shade.odbc.bridge.jdbc3;
 
+import com.shade.odbc.bridge.OdbcResultSet;
 import com.shade.odbc.bridge.OdbcStatement;
+import com.shade.odbc.wrapper.OdbcException;
+import com.shade.odbc.wrapper.OdbcLibrary;
 import com.shade.util.NotNull;
+import com.sun.jna.Memory;
+import com.sun.jna.ptr.IntByReference;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -11,16 +16,9 @@ import java.sql.*;
 import java.util.Calendar;
 import java.util.Map;
 
-public abstract class JDBC3ResultSet implements ResultSet {
-    private final OdbcStatement statement;
-
-    public JDBC3ResultSet(@NotNull OdbcStatement statement) {
-        this.statement = statement;
-    }
-
-    @Override
-    public boolean next() throws SQLException {
-        throw new SQLFeatureNotSupportedException("next");
+public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet {
+    public JDBC3ResultSet(@NotNull OdbcStatement statement) throws OdbcException {
+        super(statement);
     }
 
     @Override
@@ -30,7 +28,14 @@ public abstract class JDBC3ResultSet implements ResultSet {
 
     @Override
     public String getString(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getString");
+        ensureColumn(columnIndex);
+        final Memory memory = new Memory(1024);
+        final IntByReference length = new IntByReference();
+        OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, OdbcLibrary.SQL_WCHAR, memory, (int) (memory.size() - 1), length);
+        if (length.getValue() > memory.size() - 1) {
+            throw new SQLException("Value is too long");
+        }
+        return memory.getWideString(0);
     }
 
     @Override
@@ -201,11 +206,6 @@ public abstract class JDBC3ResultSet implements ResultSet {
     @Override
     public String getCursorName() throws SQLException {
         throw new SQLFeatureNotSupportedException("getCursorName");
-    }
-
-    @Override
-    public ResultSetMetaData getMetaData() throws SQLException {
-        throw new SQLFeatureNotSupportedException("getMetaData");
     }
 
     @Override
@@ -574,11 +574,6 @@ public abstract class JDBC3ResultSet implements ResultSet {
     }
 
     @Override
-    public Statement getStatement() {
-        return statement;
-    }
-
-    @Override
     public Object getObject(int columnIndex, Map<String, Class<?>> map) throws SQLException {
         throw new SQLFeatureNotSupportedException("getObject");
     }
@@ -706,16 +701,6 @@ public abstract class JDBC3ResultSet implements ResultSet {
     @Override
     public void updateArray(String columnLabel, Array x) throws SQLException {
         throw new SQLFeatureNotSupportedException("updateArray");
-    }
-
-    @Override
-    public boolean isClosed() throws SQLException {
-        throw new SQLFeatureNotSupportedException("isClosed");
-    }
-
-    @Override
-    public void close() throws SQLException {
-        throw new SQLFeatureNotSupportedException("close");
     }
 
     @Override
