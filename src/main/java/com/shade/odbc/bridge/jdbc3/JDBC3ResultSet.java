@@ -7,6 +7,7 @@ import com.shade.odbc.wrapper.OdbcLibrary;
 import com.shade.util.NotNull;
 import com.shade.util.Nullable;
 import com.sun.jna.Memory;
+import com.sun.jna.Structure;
 import com.sun.jna.ptr.*;
 
 import java.io.ByteArrayOutputStream;
@@ -15,6 +16,10 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -136,18 +141,78 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     }
 
     @Override
+    public Date getDate(String columnLabel) throws SQLException {
+        return getDate(columnLabel, Calendar.getInstance());
+    }
+
+    @Override
     public Date getDate(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getDate");
+        return getDate(columnIndex, Calendar.getInstance());
+    }
+
+    @Override
+    public Date getDate(String columnLabel, Calendar cal) throws SQLException {
+        return getDate(findColumn(columnLabel), cal);
+    }
+
+    @Override
+    public Date getDate(int columnIndex, Calendar cal) throws SQLException {
+        final OdbcLibrary.Date result = getData(columnIndex, OdbcLibrary.SQL_C_TYPE_DATE, OdbcLibrary.Date::new);
+        if (result == null) {
+            return null;
+        }
+        return Date.valueOf(LocalDate.of(result.year, result.month, result.day));
+    }
+
+    @Override
+    public Time getTime(String columnLabel) throws SQLException {
+        return getTime(columnLabel, Calendar.getInstance());
     }
 
     @Override
     public Time getTime(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getTime");
+        return getTime(columnIndex, Calendar.getInstance());
+    }
+
+    @Override
+    public Time getTime(String columnLabel, Calendar cal) throws SQLException {
+        return getTime(findColumn(columnLabel), cal);
+    }
+
+    @Override
+    public Time getTime(int columnIndex, Calendar cal) throws SQLException {
+        final OdbcLibrary.Time result = getData(columnIndex, OdbcLibrary.SQL_C_TYPE_TIME, OdbcLibrary.Time::new);
+        if (result == null) {
+            return null;
+        }
+        return Time.valueOf(LocalTime.of(result.hour, result.minute, result.second));
+    }
+
+    @Override
+    public Timestamp getTimestamp(String columnLabel) throws SQLException {
+        return getTimestamp(columnLabel, Calendar.getInstance());
     }
 
     @Override
     public Timestamp getTimestamp(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getTimestamp");
+        return getTimestamp(columnIndex, Calendar.getInstance());
+    }
+
+    @Override
+    public Timestamp getTimestamp(String columnLabel, Calendar cal) throws SQLException {
+        return getTimestamp(findColumn(columnLabel), cal);
+    }
+
+    @Override
+    public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
+        final OdbcLibrary.Timestamp result = getData(columnIndex, OdbcLibrary.SQL_C_TYPE_TIMESTAMP, OdbcLibrary.Timestamp::new);
+        if (result == null) {
+            return null;
+        }
+        final Instant instant = ZonedDateTime
+            .of(result.date.year, result.date.month, result.date.day, result.time.hour, result.time.minute, result.time.second, result.fraction, cal.getTimeZone().toZoneId())
+            .toInstant();
+        return Timestamp.from(instant);
     }
 
     @Override
@@ -168,21 +233,6 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     @Override
     public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException {
         throw new SQLFeatureNotSupportedException("getBigDecimal");
-    }
-
-    @Override
-    public Date getDate(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getDate");
-    }
-
-    @Override
-    public Time getTime(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getTime");
-    }
-
-    @Override
-    public Timestamp getTimestamp(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getTimestamp");
     }
 
     @Override
@@ -278,36 +328,6 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     @Override
     public Array getArray(String columnLabel) throws SQLException {
         throw new SQLFeatureNotSupportedException("getArray");
-    }
-
-    @Override
-    public Date getDate(int columnIndex, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getDate");
-    }
-
-    @Override
-    public Date getDate(String columnLabel, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getDate");
-    }
-
-    @Override
-    public Time getTime(int columnIndex, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getTime");
-    }
-
-    @Override
-    public Time getTime(String columnLabel, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getTime");
-    }
-
-    @Override
-    public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getTimestamp");
-    }
-
-    @Override
-    public Timestamp getTimestamp(String columnLabel, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getTimestamp");
     }
 
     @Override
@@ -676,6 +696,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public int findColumn(String columnLabel) throws SQLException {
+        ensureOpen();
         return getMetaData().getColumnIndex(columnLabel);
     }
 
@@ -737,6 +758,25 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     @Override
     public <T> T unwrap(Class<T> iface) {
         return iface.cast(this);
+    }
+
+    @Nullable
+    private <R extends Structure> R getData(int columnIndex, short targetType, @NotNull Supplier<R> supplier) throws SQLException {
+        ensureOpen();
+        ensureColumn(columnIndex);
+
+        final R container = supplier.get();
+        final IntByReference length = new IntByReference();
+
+        OdbcException.check("SQLGetData", OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, targetType, container, container.size(), length), getStatement().getHandle());
+
+        if (length.getValue() == OdbcLibrary.SQL_NULL_DATA) {
+            wasNull = true;
+            return null;
+        }
+
+        wasNull = false;
+        return container;
     }
 
     @Nullable

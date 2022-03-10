@@ -1,9 +1,6 @@
 package com.shade.odbc.wrapper;
 
-import com.sun.jna.Library;
-import com.sun.jna.Native;
-import com.sun.jna.Pointer;
-import com.sun.jna.WString;
+import com.sun.jna.*;
 import com.sun.jna.ptr.ByReference;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
@@ -38,6 +35,14 @@ public interface OdbcLibrary extends Library {
     short SQL_INTERVAL = 10;
     short SQL_TIME = 10;
     short SQL_TIMESTAMP = 11;
+
+    short SQL_TYPE_DATE = 91;
+    short SQL_TYPE_TIME = 92;
+    short SQL_TYPE_TIMESTAMP = 93;
+
+    short SQL_C_TYPE_DATE = SQL_TYPE_DATE;
+    short SQL_C_TYPE_TIME = SQL_TYPE_TIME;
+    short SQL_C_TYPE_TIMESTAMP = SQL_TYPE_TIMESTAMP;
 
     short SQL_LONGVARCHAR = -1;
     short SQL_BINARY = -2;
@@ -127,6 +132,8 @@ public interface OdbcLibrary extends Library {
 
     short SQLGetData(Pointer StatementHandle, short ColumnNumber, short TargetType, Pointer TargetValue, int BufferLength, IntByReference StrLen_or_IndPtr);
 
+    short SQLGetData(Pointer StatementHandle, short ColumnNumber, short TargetType, Structure TargetValue, int BufferLength, IntByReference StrLen_or_IndPtr);
+
     short SQLGetData(Pointer StatementHandle, short ColumnNumber, short TargetType, ByReference TargetValue, int BufferLength, IntByReference StrLen_or_IndPtr);
 
     short SQLNumParams(Pointer StatementHandle, ShortByReference ParameterCountPtr);
@@ -156,4 +163,25 @@ public interface OdbcLibrary extends Library {
     short SQLGetCursorNameW(Pointer StatementHandle, WString CursorName, short BufferLength, ShortByReference NameLengthPtr);
 
     short SQLSetCursorNameW(Pointer StatementHandle, WString CursorName, short NameLength);
+
+    @Structure.FieldOrder({"year", "month", "day"})
+    class Date extends Structure {
+        public short year;
+        public short month;
+        public short day;
+    }
+
+    @Structure.FieldOrder({"hour", "minute", "second"})
+    class Time extends Structure {
+        public short hour;
+        public short minute;
+        public short second;
+    }
+
+    @Structure.FieldOrder({"date", "time", "fraction"})
+    class Timestamp extends Structure {
+        public Date date;
+        public Time time;
+        public int fraction;
+    }
 }
