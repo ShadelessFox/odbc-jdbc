@@ -29,9 +29,11 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
         super(statement);
     }
 
+    //<editor-fold desc="Data Retrieval API">
+
     @Override
     public String getString(String columnLabel) throws SQLException {
-        return getString(getMetaData().getColumnIndex(columnLabel));
+        return getString(findColumn(columnLabel));
     }
 
     @Override
@@ -42,7 +44,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public byte[] getBytes(String columnLabel) throws SQLException {
-        return getBytes(getMetaData().getColumnIndex(columnLabel));
+        return getBytes(findColumn(columnLabel));
     }
 
     @Override
@@ -53,7 +55,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public boolean getBoolean(String columnLabel) throws SQLException {
-        return getBoolean(getMetaData().getColumnIndex(columnLabel));
+        return getBoolean(findColumn(columnLabel));
     }
 
     @Override
@@ -65,7 +67,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public byte getByte(String columnLabel) throws SQLException {
-        return getByte(getMetaData().getColumnIndex(columnLabel));
+        return getByte(findColumn(columnLabel));
     }
 
     @Override
@@ -76,7 +78,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public short getShort(String columnLabel) throws SQLException {
-        return getShort(getMetaData().getColumnIndex(columnLabel));
+        return getShort(findColumn(columnLabel));
     }
 
     @Override
@@ -87,7 +89,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public int getInt(String columnLabel) throws SQLException {
-        return getInt(getMetaData().getColumnIndex(columnLabel));
+        return getInt(findColumn(columnLabel));
     }
 
     @Override
@@ -98,7 +100,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public long getLong(String columnLabel) throws SQLException {
-        return getLong(getMetaData().getColumnIndex(columnLabel));
+        return getLong(findColumn(columnLabel));
     }
 
     @Override
@@ -108,7 +110,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public float getFloat(String columnLabel) throws SQLException {
-        return getFloat(getMetaData().getColumnIndex(columnLabel));
+        return getFloat(findColumn(columnLabel));
     }
 
     @Override
@@ -119,7 +121,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public double getDouble(String columnLabel) throws SQLException {
-        return getDouble(getMetaData().getColumnIndex(columnLabel));
+        return getDouble(findColumn(columnLabel));
     }
 
     @Override
@@ -199,21 +201,6 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     }
 
     @Override
-    public SQLWarning getWarnings() throws SQLException {
-        throw new SQLFeatureNotSupportedException("getWarnings");
-    }
-
-    @Override
-    public void clearWarnings() throws SQLException {
-        throw new SQLFeatureNotSupportedException("clearWarnings");
-    }
-
-    @Override
-    public String getCursorName() throws SQLException {
-        throw new SQLFeatureNotSupportedException("getCursorName");
-    }
-
-    @Override
     public Object getObject(int columnIndex) throws SQLException {
         throw new SQLFeatureNotSupportedException("getObject");
     }
@@ -221,11 +208,6 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     @Override
     public Object getObject(String columnLabel) throws SQLException {
         throw new SQLFeatureNotSupportedException("getObject");
-    }
-
-    @Override
-    public int findColumn(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("findColumn");
     }
 
     @Override
@@ -249,109 +231,98 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     }
 
     @Override
-    public boolean isBeforeFirst() throws SQLException {
-        throw new SQLFeatureNotSupportedException("isBeforeFirst");
+    public Object getObject(int columnIndex, Map<String, Class<?>> map) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getObject");
     }
 
     @Override
-    public boolean isAfterLast() throws SQLException {
-        throw new SQLFeatureNotSupportedException("isAfterLast");
+    public Ref getRef(int columnIndex) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getRef");
     }
 
     @Override
-    public boolean isFirst() throws SQLException {
-        throw new SQLFeatureNotSupportedException("isFirst");
+    public Blob getBlob(int columnIndex) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getBlob");
     }
 
     @Override
-    public boolean isLast() throws SQLException {
-        throw new SQLFeatureNotSupportedException("isLast");
+    public Clob getClob(int columnIndex) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getClob");
     }
 
     @Override
-    public void beforeFirst() throws SQLException {
-        throw new SQLFeatureNotSupportedException("beforeFirst");
+    public Array getArray(int columnIndex) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getArray");
     }
 
     @Override
-    public void afterLast() throws SQLException {
-        throw new SQLFeatureNotSupportedException("afterLast");
+    public Object getObject(String columnLabel, Map<String, Class<?>> map) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getObject");
     }
 
     @Override
-    public boolean first() throws SQLException {
-        throw new SQLFeatureNotSupportedException("first");
+    public Ref getRef(String columnLabel) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getRef");
     }
 
     @Override
-    public boolean last() throws SQLException {
-        throw new SQLFeatureNotSupportedException("last");
+    public Blob getBlob(String columnLabel) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getBlob");
     }
 
     @Override
-    public int getRow() throws SQLException {
-        throw new SQLFeatureNotSupportedException("getRow");
+    public Clob getClob(String columnLabel) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getClob");
     }
 
     @Override
-    public boolean absolute(int row) throws SQLException {
-        throw new SQLFeatureNotSupportedException("absolute");
+    public Array getArray(String columnLabel) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getArray");
     }
 
     @Override
-    public boolean relative(int rows) throws SQLException {
-        throw new SQLFeatureNotSupportedException("relative");
+    public Date getDate(int columnIndex, Calendar cal) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getDate");
     }
 
     @Override
-    public boolean previous() throws SQLException {
-        throw new SQLFeatureNotSupportedException("previous");
+    public Date getDate(String columnLabel, Calendar cal) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getDate");
     }
 
     @Override
-    public void setFetchDirection(int direction) throws SQLException {
-        throw new SQLFeatureNotSupportedException("setFetchDirection");
+    public Time getTime(int columnIndex, Calendar cal) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getTime");
     }
 
     @Override
-    public int getFetchDirection() throws SQLException {
-        throw new SQLFeatureNotSupportedException("getFetchDirection");
+    public Time getTime(String columnLabel, Calendar cal) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getTime");
     }
 
     @Override
-    public void setFetchSize(int rows) throws SQLException {
-        throw new SQLFeatureNotSupportedException("setFetchSize");
+    public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getTimestamp");
     }
 
     @Override
-    public int getFetchSize() throws SQLException {
-        throw new SQLFeatureNotSupportedException("getFetchSize");
+    public Timestamp getTimestamp(String columnLabel, Calendar cal) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getTimestamp");
     }
 
     @Override
-    public int getType() throws SQLException {
-        throw new SQLFeatureNotSupportedException("getType");
+    public URL getURL(int columnIndex) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getURL");
     }
 
     @Override
-    public int getConcurrency() throws SQLException {
-        throw new SQLFeatureNotSupportedException("getConcurrency");
+    public URL getURL(String columnLabel) throws SQLException {
+        throw new SQLFeatureNotSupportedException("getURL");
     }
 
-    @Override
-    public boolean rowUpdated() throws SQLException {
-        throw new SQLFeatureNotSupportedException("rowUpdated");
-    }
+    //</editor-fold>
 
-    @Override
-    public boolean rowInserted() throws SQLException {
-        throw new SQLFeatureNotSupportedException("rowInserted");
-    }
-
-    @Override
-    public boolean rowDeleted() throws SQLException {
-        throw new SQLFeatureNotSupportedException("rowDeleted");
-    }
+    //<editor-fold desc="Data Update API">
 
     @Override
     public void updateNull(int columnIndex) throws SQLException {
@@ -544,131 +515,6 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     }
 
     @Override
-    public void insertRow() throws SQLException {
-        throw new SQLFeatureNotSupportedException("insertRow");
-    }
-
-    @Override
-    public void updateRow() throws SQLException {
-        throw new SQLFeatureNotSupportedException("updateRow");
-    }
-
-    @Override
-    public void deleteRow() throws SQLException {
-        throw new SQLFeatureNotSupportedException("deleteRow");
-    }
-
-    @Override
-    public void refreshRow() throws SQLException {
-        throw new SQLFeatureNotSupportedException("refreshRow");
-    }
-
-    @Override
-    public void cancelRowUpdates() throws SQLException {
-        throw new SQLFeatureNotSupportedException("cancelRowUpdates");
-    }
-
-    @Override
-    public void moveToInsertRow() throws SQLException {
-        throw new SQLFeatureNotSupportedException("moveToInsertRow");
-    }
-
-    @Override
-    public void moveToCurrentRow() throws SQLException {
-        throw new SQLFeatureNotSupportedException("moveToCurrentRow");
-    }
-
-    @Override
-    public Object getObject(int columnIndex, Map<String, Class<?>> map) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getObject");
-    }
-
-    @Override
-    public Ref getRef(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getRef");
-    }
-
-    @Override
-    public Blob getBlob(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getBlob");
-    }
-
-    @Override
-    public Clob getClob(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getClob");
-    }
-
-    @Override
-    public Array getArray(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getArray");
-    }
-
-    @Override
-    public Object getObject(String columnLabel, Map<String, Class<?>> map) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getObject");
-    }
-
-    @Override
-    public Ref getRef(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getRef");
-    }
-
-    @Override
-    public Blob getBlob(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getBlob");
-    }
-
-    @Override
-    public Clob getClob(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getClob");
-    }
-
-    @Override
-    public Array getArray(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getArray");
-    }
-
-    @Override
-    public Date getDate(int columnIndex, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getDate");
-    }
-
-    @Override
-    public Date getDate(String columnLabel, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getDate");
-    }
-
-    @Override
-    public Time getTime(int columnIndex, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getTime");
-    }
-
-    @Override
-    public Time getTime(String columnLabel, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getTime");
-    }
-
-    @Override
-    public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getTimestamp");
-    }
-
-    @Override
-    public Timestamp getTimestamp(String columnLabel, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getTimestamp");
-    }
-
-    @Override
-    public URL getURL(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getURL");
-    }
-
-    @Override
-    public URL getURL(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getURL");
-    }
-
-    @Override
     public void updateRef(int columnIndex, Ref x) throws SQLException {
         throw new SQLFeatureNotSupportedException("updateRef");
     }
@@ -708,9 +554,179 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
         throw new SQLFeatureNotSupportedException("updateArray");
     }
 
+    //</editor-fold>
+
+    //<editor-fold desc="Row Positioning API">
+
+    @Override
+    public int getRow() throws SQLException {
+        throw new SQLFeatureNotSupportedException("getRow");
+    }
+
+    @Override
+    public boolean isBeforeFirst() throws SQLException {
+        throw new SQLFeatureNotSupportedException("isBeforeFirst");
+    }
+
+    @Override
+    public void beforeFirst() throws SQLException {
+        throw new SQLFeatureNotSupportedException("beforeFirst");
+    }
+
+    @Override
+    public boolean isAfterLast() throws SQLException {
+        throw new SQLFeatureNotSupportedException("isAfterLast");
+    }
+
+    @Override
+    public void afterLast() throws SQLException {
+        throw new SQLFeatureNotSupportedException("afterLast");
+    }
+
+    @Override
+    public boolean isFirst() throws SQLException {
+        throw new SQLFeatureNotSupportedException("isFirst");
+    }
+
+    @Override
+    public boolean first() throws SQLException {
+        throw new SQLFeatureNotSupportedException("first");
+    }
+
+    @Override
+    public boolean isLast() throws SQLException {
+        throw new SQLFeatureNotSupportedException("isLast");
+    }
+
+    @Override
+    public boolean last() throws SQLException {
+        throw new SQLFeatureNotSupportedException("last");
+    }
+
+    @Override
+    public boolean previous() throws SQLException {
+        throw new SQLFeatureNotSupportedException("previous");
+    }
+
+    @Override
+    public boolean absolute(int row) throws SQLException {
+        throw new SQLFeatureNotSupportedException("absolute");
+    }
+
+    @Override
+    public boolean relative(int rows) throws SQLException {
+        throw new SQLFeatureNotSupportedException("relative");
+    }
+
+    //</editor-fold>
+
+    //<editor-fold desc="Row Manipulation API">
+
+    @Override
+    public boolean rowUpdated() throws SQLException {
+        throw new SQLFeatureNotSupportedException("rowUpdated");
+    }
+
+    @Override
+    public boolean rowInserted() throws SQLException {
+        throw new SQLFeatureNotSupportedException("rowInserted");
+    }
+
+    @Override
+    public boolean rowDeleted() throws SQLException {
+        throw new SQLFeatureNotSupportedException("rowDeleted");
+    }
+
+    @Override
+    public void insertRow() throws SQLException {
+        throw new SQLFeatureNotSupportedException("insertRow");
+    }
+
+    @Override
+    public void updateRow() throws SQLException {
+        throw new SQLFeatureNotSupportedException("updateRow");
+    }
+
+    @Override
+    public void deleteRow() throws SQLException {
+        throw new SQLFeatureNotSupportedException("deleteRow");
+    }
+
+    @Override
+    public void refreshRow() throws SQLException {
+        throw new SQLFeatureNotSupportedException("refreshRow");
+    }
+
+    @Override
+    public void cancelRowUpdates() throws SQLException {
+        throw new SQLFeatureNotSupportedException("cancelRowUpdates");
+    }
+
+    @Override
+    public void moveToInsertRow() throws SQLException {
+        throw new SQLFeatureNotSupportedException("moveToInsertRow");
+    }
+
+    @Override
+    public void moveToCurrentRow() throws SQLException {
+        throw new SQLFeatureNotSupportedException("moveToCurrentRow");
+    }
+
+    //</editor-fold>
+
+    @Override
+    public int findColumn(String columnLabel) throws SQLException {
+        return getMetaData().getColumnIndex(columnLabel);
+    }
+
     @Override
     public boolean wasNull() {
         return wasNull;
+    }
+
+    @Override
+    public SQLWarning getWarnings() throws SQLException {
+        throw new SQLFeatureNotSupportedException("getWarnings");
+    }
+
+    @Override
+    public void clearWarnings() throws SQLException {
+        throw new SQLFeatureNotSupportedException("clearWarnings");
+    }
+
+    @Override
+    public String getCursorName() throws SQLException {
+        throw new SQLFeatureNotSupportedException("getCursorName");
+    }
+
+    @Override
+    public void setFetchDirection(int direction) throws SQLException {
+        throw new SQLFeatureNotSupportedException("setFetchDirection");
+    }
+
+    @Override
+    public int getFetchDirection() throws SQLException {
+        throw new SQLFeatureNotSupportedException("getFetchDirection");
+    }
+
+    @Override
+    public void setFetchSize(int rows) throws SQLException {
+        throw new SQLFeatureNotSupportedException("setFetchSize");
+    }
+
+    @Override
+    public int getFetchSize() throws SQLException {
+        throw new SQLFeatureNotSupportedException("getFetchSize");
+    }
+
+    @Override
+    public int getType() throws SQLException {
+        throw new SQLFeatureNotSupportedException("getType");
+    }
+
+    @Override
+    public int getConcurrency() throws SQLException {
+        throw new SQLFeatureNotSupportedException("getConcurrency");
     }
 
     @Override
