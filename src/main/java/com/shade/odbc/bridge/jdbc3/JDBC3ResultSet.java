@@ -807,18 +807,30 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
         final IntByReference length = new IntByReference();
         final R result = supplier.get();
 
-        do {
-            OdbcException.check("SQLGetData", OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, targetType, buffer, (int) (buffer.size() - 1), length), getStatement().getHandle());
+        while (true) {
+            final short rc = OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, targetType, buffer, (int) (buffer.size() - 1), length);
+            final int remaining;
 
-            if (length.getValue() == OdbcLibrary.SQL_NULL_DATA) {
-                wasNull = true;
-                return null;
+            if (rc == OdbcLibrary.SQL_NO_DATA) {
+                wasNull = false;
+                return result;
             }
 
-            accumulator.accept(result, extractor.apply(buffer, length.getValue()));
-        } while (length.getValue() > buffer.size() - 1);
+            OdbcException.check("SQLGetData", rc, getStatement().getHandle());
 
-        wasNull = false;
-        return result;
+            switch (length.getValue()) {
+                case OdbcLibrary.SQL_NULL_DATA:
+                    wasNull = true;
+                    return null;
+                case OdbcLibrary.SQL_NO_TOTAL:
+                    remaining = (int) buffer.size();
+                    break;
+                default:
+                    remaining = length.getValue();
+                    break;
+            }
+
+            accumulator.accept(result, extractor.apply(buffer, remaining));
+        }
     }
 }

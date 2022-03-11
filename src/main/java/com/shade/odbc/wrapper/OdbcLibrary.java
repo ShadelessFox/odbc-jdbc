@@ -19,6 +19,7 @@ public interface OdbcLibrary extends Library {
     short SQL_SUCCESS_WITH_INFO = 1;
     short SQL_NO_DATA = 100;
     short SQL_NULL_DATA = -1;
+    short SQL_NO_TOTAL = -4;
 
     short SQL_TRUE = 1;
     short SQL_FALSE = 0;
