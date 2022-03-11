@@ -21,6 +21,10 @@ public abstract class OdbcStatement implements Statement {
     }
 
     protected boolean exec(@NotNull String sql) throws SQLException {
+        if (resultSet != null) {
+            resultSet.close();
+            resultSet = null;
+        }
         final short rc = OdbcLibrary.INSTANCE.SQLExecDirectW(handle.getPointer(), new WString(sql), OdbcLibrary.SQL_NTS);
         if (rc == OdbcLibrary.SQL_NO_DATA) {
             return false;
