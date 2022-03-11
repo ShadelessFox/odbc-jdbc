@@ -165,6 +165,8 @@ public interface OdbcLibrary extends Library {
 
     short SQLSetCursorNameW(Pointer StatementHandle, WString CursorName, short NameLength);
 
+    short SQLCloseCursor(Pointer StatementHandle);
+
     @Structure.FieldOrder({"year", "month", "day"})
     class Date extends Structure {
         public short year;

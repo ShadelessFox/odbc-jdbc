@@ -42,8 +42,8 @@ public abstract class OdbcStatement implements Statement {
 
     @Override
     public void cancel() throws SQLException {
-        connection.ensureOpen();
-        OdbcException.check("SQLCancelHandle", OdbcLibrary.INSTANCE.SQLCancelHandle(OdbcLibrary.SQL_HANDLE_STMT, getHandle().getPointer()), getHandle());
+        ensureOpen();
+        OdbcException.check("SQLCancelHandle", OdbcLibrary.INSTANCE.SQLCancelHandle(OdbcLibrary.SQL_HANDLE_STMT, handle.getPointer()), handle);
     }
 
     @Override
@@ -52,8 +52,11 @@ public abstract class OdbcStatement implements Statement {
     }
 
     @Override
-    public void close() {
-        System.out.println("TODO: implement OdbcStatement#close");
+    public void close() throws OdbcException {
+        if (isClosed()) {
+            return;
+        }
+        handle.close();
     }
 
     @Override
@@ -64,5 +67,12 @@ public abstract class OdbcStatement implements Statement {
     @Override
     public <T> T unwrap(Class<T> iface) {
         return iface.cast(this);
+    }
+
+    public void ensureOpen() throws SQLException {
+        if (isClosed()) {
+            throw new SQLException("Statement is closed");
+        }
+        connection.ensureOpen();
     }
 }

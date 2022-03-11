@@ -18,6 +18,7 @@ public abstract class OdbcResultSet implements ResultSet {
     }
 
     public boolean next() throws SQLException {
+        ensureOpen();
         final short rc = OdbcLibrary.INSTANCE.SQLFetch(statement.getHandle().getPointer());
         if (rc == OdbcLibrary.SQL_NO_DATA) {
             return false;
@@ -42,14 +43,19 @@ public abstract class OdbcResultSet implements ResultSet {
     }
 
     @Override
-    public void close() {
-        System.out.println("TODO: implement OdbcResultSet#close");
+    public void close() throws SQLException {
+        if (isClosed()) {
+            return;
+        }
+        OdbcException.check("SQLCloseCursor", OdbcLibrary.INSTANCE.SQLCloseCursor(statement.getHandle().getPointer()), statement.getHandle());
+        closed = true;
     }
 
     public void ensureOpen() throws SQLException {
         if (isClosed()) {
             throw new SQLException("Result set is closed");
         }
+        statement.ensureOpen();
     }
 
     public void ensureColumn(int index) throws SQLException {

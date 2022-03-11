@@ -100,8 +100,12 @@ public abstract class OdbcConnection implements Connection {
     }
 
     @Override
-    public void close() {
-        System.out.println("TODO: implement OdbcConnection#close");
+    public void close() throws OdbcException {
+        if (isClosed()) {
+            return;
+        }
+        OdbcException.check("SQLDisconnect", OdbcLibrary.INSTANCE.SQLDisconnect(handle.getPointer()), handle);
+        handle.close();
     }
 
     @Override
