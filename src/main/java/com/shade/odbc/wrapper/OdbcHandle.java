@@ -40,8 +40,10 @@ public class OdbcHandle implements AutoCloseable {
     @NotNull
     private static OdbcHandle create(@NotNull Type type, @Nullable OdbcHandle input) throws OdbcException {
         final PointerByReference output = new PointerByReference();
-        OdbcException.check("SQLAllocHandle", OdbcLibrary.INSTANCE.SQLAllocHandle(type.value, input != null ? input.pointer : null, output), type.value, output.getValue());
-        return new OdbcHandle(type, output.getValue());
+        if (OdbcException.succeeded(OdbcLibrary.INSTANCE.SQLAllocHandle(type.value, input != null ? input.pointer : null, output))) {
+            return new OdbcHandle(type, output.getValue());
+        }
+        throw new OdbcException("Can't allocate handle of type " + type, null, "SQLAllocHandle", 0);
     }
 
     @NotNull
