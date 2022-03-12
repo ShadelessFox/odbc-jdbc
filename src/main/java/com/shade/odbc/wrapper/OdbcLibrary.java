@@ -13,6 +13,7 @@ public interface OdbcLibrary extends Library {
     short SQL_HANDLE_DESC = 4;
 
     short SQL_ATTR_ODBC_VERSION = 200;
+    short SQL_ATTR_AUTOCOMMIT = 102;
     short SQL_NTS = -3;
 
     short SQL_SUCCESS = 0;
@@ -25,6 +26,9 @@ public interface OdbcLibrary extends Library {
     short SQL_FALSE = 0;
 
     short SQL_CHAR = 1;
+    short SQL_VARCHAR = 12;
+    short SQL_LONGVARCHAR = -1;
+
     short SQL_NUMERIC = 2;
     short SQL_DECIMAL = 3;
     short SQL_INTEGER = 4;
@@ -45,7 +49,6 @@ public interface OdbcLibrary extends Library {
     short SQL_C_TYPE_TIME = SQL_TYPE_TIME;
     short SQL_C_TYPE_TIMESTAMP = SQL_TYPE_TIMESTAMP;
 
-    short SQL_LONGVARCHAR = -1;
     short SQL_BINARY = -2;
     short SQL_VARBINARY = -3;
     short SQL_LONGVARBINARY = -4;
@@ -79,8 +82,6 @@ public interface OdbcLibrary extends Library {
     short SQL_DRIVER_COMPLETE = 1;
     short SQL_DRIVER_PROMPT = 2;
     short SQL_DRIVER_COMPLETE_REQUIRED = 3;
-
-    short SQL_AUTOCOMMIT = 102;
 
     short SQL_AUTOCOMMIT_OFF = 0;
     short SQL_AUTOCOMMIT_ON = 1;
@@ -157,7 +158,7 @@ public interface OdbcLibrary extends Library {
 
     short SQLSetEnvAttr(Pointer EnvironmentHandle, int Attribute, Pointer Value, int StringLength);
 
-    short SQLGetConnectAttr(Pointer ConnectionHandle, int Attribute, Pointer Value, int BufferLength, IntByReference StringLengthPtr);
+    short SQLGetConnectAttr(Pointer ConnectionHandle, int Attribute, ByReference Value, int BufferLength, IntByReference StringLengthPtr);
 
     short SQLSetConnectAttr(Pointer ConnectionHandle, int Attribute, Pointer Value, int StringLength);
 

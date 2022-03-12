@@ -7,6 +7,7 @@ import com.shade.odbc.wrapper.OdbcLibrary;
 import com.shade.util.NotNull;
 import com.sun.jna.Pointer;
 import com.sun.jna.WString;
+import com.sun.jna.ptr.IntByReference;
 
 import java.sql.*;
 import java.util.Properties;
@@ -14,7 +15,6 @@ import java.util.Properties;
 public abstract class OdbcConnection implements Connection {
     private final OdbcHandle handle;
     private final OdbcDatabaseMetaData metaData;
-    private boolean autoCommit = true;
 
     public OdbcConnection(@NotNull OdbcHandle environment, @NotNull String connectionString, @NotNull Properties info) throws SQLException {
         this.handle = OdbcHandle.createConnectionHandle(environment);
@@ -66,25 +66,18 @@ public abstract class OdbcConnection implements Connection {
     }
 
     @Override
-    public void setAutoCommit(boolean autoCommit) throws SQLException {
-        if (this.autoCommit == autoCommit) {
-            return;
-        }
-        try {
-            OdbcException.check(
-                OdbcLibrary.INSTANCE.SQLSetConnectAttr(handle.getPointer(), OdbcLibrary.SQL_AUTOCOMMIT, Pointer.createConstant(autoCommit ? OdbcLibrary.SQL_AUTOCOMMIT_ON : OdbcLibrary.SQL_AUTOCOMMIT_OFF), 0), "SQLSetConnectAttr",
-                handle
-            );
-        } catch (SQLException e) {
-            rollback();
-            throw e;
-        }
-        this.autoCommit = autoCommit;
+    public boolean getAutoCommit() throws SQLException {
+        ensureOpen();
+        final IntByReference result = new IntByReference();
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLGetConnectAttr(handle.getPointer(), OdbcLibrary.SQL_ATTR_AUTOCOMMIT, result, 0, null), "SQLGetConnectAttr", handle);
+        return result.getValue() == OdbcLibrary.SQL_AUTOCOMMIT_ON;
     }
 
     @Override
-    public boolean getAutoCommit() {
-        return autoCommit;
+    public void setAutoCommit(boolean autoCommit) throws SQLException {
+        ensureOpen();
+        final int value = autoCommit ? OdbcLibrary.SQL_AUTOCOMMIT_ON : OdbcLibrary.SQL_AUTOCOMMIT_OFF;
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLSetConnectAttr(handle.getPointer(), OdbcLibrary.SQL_ATTR_AUTOCOMMIT, Pointer.createConstant(value), 0), "SQLSetConnectAttr", handle);
     }
 
     @Override
