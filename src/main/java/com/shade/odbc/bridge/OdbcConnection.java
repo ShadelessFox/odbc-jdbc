@@ -22,8 +22,7 @@ public abstract class OdbcConnection implements Connection {
 
         try {
             OdbcException.check(
-                "SQLDriverConnectW",
-                OdbcLibrary.INSTANCE.SQLDriverConnectW(handle.getPointer(), null, new WString(connectionString), OdbcLibrary.SQL_NTS, null, (short) 0, null, OdbcLibrary.SQL_DRIVER_COMPLETE),
+                OdbcLibrary.INSTANCE.SQLDriverConnectW(handle.getPointer(), null, new WString(connectionString), OdbcLibrary.SQL_NTS, null, (short) 0, null, OdbcLibrary.SQL_DRIVER_COMPLETE), "SQLDriverConnectW",
                 handle
             );
         } catch (Throwable e) {
@@ -36,14 +35,14 @@ public abstract class OdbcConnection implements Connection {
     public void commit() throws SQLException {
         ensureOpen();
         ensureManualCommit();
-        OdbcException.check("SQLEndTran", OdbcLibrary.INSTANCE.SQLEndTran(handle.getType().getValue(), handle.getPointer(), OdbcLibrary.SQL_COMMIT), handle);
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLEndTran(handle.getType().getValue(), handle.getPointer(), OdbcLibrary.SQL_COMMIT), "SQLEndTran", handle);
     }
 
     @Override
     public void rollback() throws SQLException {
         ensureOpen();
         ensureManualCommit();
-        OdbcException.check("SQLEndTran", OdbcLibrary.INSTANCE.SQLEndTran(handle.getType().getValue(), handle.getPointer(), OdbcLibrary.SQL_ROLLBACK), handle);
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLEndTran(handle.getType().getValue(), handle.getPointer(), OdbcLibrary.SQL_ROLLBACK), "SQLEndTran", handle);
     }
 
     @Override
@@ -73,8 +72,7 @@ public abstract class OdbcConnection implements Connection {
         }
         try {
             OdbcException.check(
-                "SQLSetConnectAttr",
-                OdbcLibrary.INSTANCE.SQLSetConnectAttr(handle.getPointer(), OdbcLibrary.SQL_AUTOCOMMIT, Pointer.createConstant(autoCommit ? OdbcLibrary.SQL_AUTOCOMMIT_ON : OdbcLibrary.SQL_AUTOCOMMIT_OFF), 0),
+                OdbcLibrary.INSTANCE.SQLSetConnectAttr(handle.getPointer(), OdbcLibrary.SQL_AUTOCOMMIT, Pointer.createConstant(autoCommit ? OdbcLibrary.SQL_AUTOCOMMIT_ON : OdbcLibrary.SQL_AUTOCOMMIT_OFF), 0), "SQLSetConnectAttr",
                 handle
             );
         } catch (SQLException e) {
@@ -104,7 +102,7 @@ public abstract class OdbcConnection implements Connection {
         if (isClosed()) {
             return;
         }
-        OdbcException.check("SQLDisconnect", OdbcLibrary.INSTANCE.SQLDisconnect(handle.getPointer()), handle);
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLDisconnect(handle.getPointer()), "SQLDisconnect", handle);
         handle.close();
     }
 

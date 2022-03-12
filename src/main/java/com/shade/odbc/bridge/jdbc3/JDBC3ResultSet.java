@@ -768,7 +768,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
         final R container = supplier.get();
         final IntByReference length = new IntByReference();
 
-        OdbcException.check("SQLGetData", OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, targetType, container, container.size(), length), getStatement().getHandle());
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, targetType, container, container.size(), length), "SQLGetData", getStatement().getHandle());
 
         if (length.getValue() == OdbcLibrary.SQL_NULL_DATA) {
             wasNull = true;
@@ -787,7 +787,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
         final T container = supplier.get();
         final IntByReference length = new IntByReference();
 
-        OdbcException.check("SQLGetData", OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, targetType, container, 0, length), getStatement().getHandle());
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, targetType, container, 0, length), "SQLGetData", getStatement().getHandle());
 
         if (length.getValue() == OdbcLibrary.SQL_NULL_DATA) {
             wasNull = true;
@@ -816,7 +816,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
                 return result;
             }
 
-            OdbcException.check("SQLGetData", rc, getStatement().getHandle());
+            OdbcException.check(rc, "SQLGetData", getStatement().getHandle());
 
             switch (length.getValue()) {
                 case OdbcLibrary.SQL_NULL_DATA:

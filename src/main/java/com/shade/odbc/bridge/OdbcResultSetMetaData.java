@@ -20,7 +20,7 @@ public class OdbcResultSetMetaData implements ResultSetMetaData {
 
     public OdbcResultSetMetaData(@NotNull OdbcStatement statement) throws OdbcException {
         final ShortByReference count = new ShortByReference();
-        OdbcException.check("SQLNumResultCols", OdbcLibrary.INSTANCE.SQLNumResultCols(statement.getHandle().getPointer(), count), statement.getHandle());
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLNumResultCols(statement.getHandle().getPointer(), count), "SQLNumResultCols", statement.getHandle());
 
         this.columns = new ColumnMetaData[count.getValue()];
         this.indexes = new HashMap<>(columns.length);
@@ -212,8 +212,7 @@ public class OdbcResultSetMetaData implements ResultSetMetaData {
         private static String getStringAttribute(@NotNull OdbcHandle handle, short column, short attribute) throws OdbcException {
             final Memory buffer = new Memory(1024);
             OdbcException.check(
-                "SQLColAttributeW",
-                OdbcLibrary.INSTANCE.SQLColAttributeW(handle.getPointer(), column, attribute, buffer, (short) (buffer.size() - 1), null, null),
+                OdbcLibrary.INSTANCE.SQLColAttributeW(handle.getPointer(), column, attribute, buffer, (short) (buffer.size() - 1), null, null), "SQLColAttributeW",
                 handle
             );
             return buffer.getWideString(0);
@@ -222,8 +221,7 @@ public class OdbcResultSetMetaData implements ResultSetMetaData {
         private static int getNumericAttribute(@NotNull OdbcHandle handle, short column, short attribute) throws OdbcException {
             final IntByReference value = new IntByReference();
             OdbcException.check(
-                "SQLColAttributeW",
-                OdbcLibrary.INSTANCE.SQLColAttributeW(handle.getPointer(), column, attribute, null, (short) 0, null, value),
+                OdbcLibrary.INSTANCE.SQLColAttributeW(handle.getPointer(), column, attribute, null, (short) 0, null, value), "SQLColAttributeW",
                 handle
             );
             return value.getValue();

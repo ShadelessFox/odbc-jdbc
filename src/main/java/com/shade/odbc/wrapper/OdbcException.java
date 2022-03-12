@@ -21,7 +21,7 @@ public class OdbcException extends SQLException {
         this.functionName = functionName;
     }
 
-    public static void check(@NotNull String function, int rc, @NotNull OdbcHandle handle) throws OdbcException {
+    public static void check(int rc, @NotNull String function, @NotNull OdbcHandle handle) throws OdbcException {
         check(function, rc, handle.getType().getValue(), handle.getPointer());
     }
 

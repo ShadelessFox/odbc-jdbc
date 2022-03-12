@@ -29,7 +29,7 @@ public abstract class OdbcStatement implements Statement {
         if (rc == OdbcLibrary.SQL_NO_DATA) {
             return false;
         }
-        OdbcException.check("SQLExecDirectW", rc, handle);
+        OdbcException.check(rc, "SQLExecDirectW", handle);
         resultSet = new JDBC4ResultSet(this);
         return true;
     }
@@ -47,7 +47,7 @@ public abstract class OdbcStatement implements Statement {
     @Override
     public void cancel() throws SQLException {
         ensureOpen();
-        OdbcException.check("SQLCancelHandle", OdbcLibrary.INSTANCE.SQLCancelHandle(OdbcLibrary.SQL_HANDLE_STMT, handle.getPointer()), handle);
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLCancelHandle(OdbcLibrary.SQL_HANDLE_STMT, handle.getPointer()), "SQLCancelHandle", handle);
     }
 
     @Override

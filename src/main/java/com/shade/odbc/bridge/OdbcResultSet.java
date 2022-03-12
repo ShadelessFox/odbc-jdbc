@@ -23,7 +23,7 @@ public abstract class OdbcResultSet implements ResultSet {
         if (rc == OdbcLibrary.SQL_NO_DATA) {
             return false;
         }
-        OdbcException.check("SQLFetch", rc, statement.getHandle());
+        OdbcException.check(rc, "SQLFetch", statement.getHandle());
         return true;
     }
 
@@ -47,7 +47,7 @@ public abstract class OdbcResultSet implements ResultSet {
         if (isClosed()) {
             return;
         }
-        OdbcException.check("SQLCloseCursor", OdbcLibrary.INSTANCE.SQLCloseCursor(statement.getHandle().getPointer()), statement.getHandle());
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLCloseCursor(statement.getHandle().getPointer()), "SQLCloseCursor", statement.getHandle());
         closed = true;
     }
 

@@ -78,7 +78,7 @@ public class OdbcDriver implements Driver {
     @NotNull
     private static OdbcHandle createEnvironment(@NotNull Properties info) throws OdbcException {
         final OdbcHandle handle = OdbcHandle.createEnvironmentHandle();
-        OdbcException.check("SQLSetEnvAttr", OdbcLibrary.INSTANCE.SQLSetEnvAttr(handle.getPointer(), OdbcLibrary.SQL_ATTR_ODBC_VERSION, Pointer.createConstant(OdbcLibrary.SQL_OV_ODBC3), 0), handle);
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLSetEnvAttr(handle.getPointer(), OdbcLibrary.SQL_ATTR_ODBC_VERSION, Pointer.createConstant(OdbcLibrary.SQL_OV_ODBC3), 0), "SQLSetEnvAttr", handle);
         return handle;
     }
 }
