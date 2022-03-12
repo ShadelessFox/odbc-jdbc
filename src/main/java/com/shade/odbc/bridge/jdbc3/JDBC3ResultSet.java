@@ -251,13 +251,41 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     }
 
     @Override
-    public Object getObject(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getObject");
+    public Object getObject(String columnLabel) throws SQLException {
+        return getObject(findColumn(columnLabel));
     }
 
     @Override
-    public Object getObject(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getObject");
+    public Object getObject(int columnIndex) throws SQLException {
+        final int type = getMetaData().getColumnType(columnIndex);
+        switch (type) {
+            case OdbcLibrary.SQL_CHAR:
+            case OdbcLibrary.SQL_VARCHAR:
+            case OdbcLibrary.SQL_LONGVARCHAR:
+            case OdbcLibrary.SQL_WCHAR:
+            case OdbcLibrary.SQL_WVARCHAR:
+            case OdbcLibrary.SQL_WLONGVARCHAR:
+                return getString(columnIndex);
+            case OdbcLibrary.SQL_TINYINT:
+                return getByte(columnIndex);
+            case OdbcLibrary.SQL_SMALLINT:
+                return getShort(columnIndex);
+            case OdbcLibrary.SQL_INTEGER:
+                return getInt(columnIndex);
+            case OdbcLibrary.SQL_FLOAT:
+            case OdbcLibrary.SQL_REAL:
+                return getFloat(columnIndex);
+            case OdbcLibrary.SQL_DOUBLE:
+                return getDouble(columnIndex);
+            case OdbcLibrary.SQL_DATE:
+                return getDate(columnIndex);
+            case OdbcLibrary.SQL_TIME:
+                return getTime(columnIndex);
+            case OdbcLibrary.SQL_TIMESTAMP:
+                return getTimestamp(columnIndex);
+            default:
+                throw new OdbcException("Can't determine Java type for SQL type " + type);
+        }
     }
 
     @Override
