@@ -1,5 +1,6 @@
 package com.shade.odbc.bridge;
 
+import com.shade.odbc.bridge.jdbc4.JDBC4Connection;
 import com.shade.odbc.wrapper.OdbcException;
 import com.shade.odbc.wrapper.OdbcHandle;
 import com.shade.odbc.wrapper.OdbcLibrary;
@@ -7,18 +8,17 @@ import com.shade.util.NotNull;
 import com.sun.jna.Pointer;
 import com.sun.jna.WString;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.sql.Savepoint;
+import java.sql.*;
 import java.util.Properties;
 
 public abstract class OdbcConnection implements Connection {
     private final OdbcHandle handle;
+    private final OdbcDatabaseMetaData metaData;
     private boolean autoCommit = true;
 
     public OdbcConnection(@NotNull OdbcHandle environment, @NotNull String connectionString, @NotNull Properties info) throws SQLException {
         this.handle = OdbcHandle.createConnectionHandle(environment);
+        this.metaData = new OdbcDatabaseMetaData((JDBC4Connection) this);
 
         try {
             OdbcException.check(
@@ -85,6 +85,11 @@ public abstract class OdbcConnection implements Connection {
     @Override
     public boolean getAutoCommit() {
         return autoCommit;
+    }
+
+    @Override
+    public DatabaseMetaData getMetaData() {
+        return metaData;
     }
 
     @Override

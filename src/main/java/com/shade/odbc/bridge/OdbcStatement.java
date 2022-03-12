@@ -13,7 +13,7 @@ import java.sql.Statement;
 public abstract class OdbcStatement implements Statement {
     private final OdbcConnection connection;
     private final OdbcHandle handle;
-    protected OdbcResultSet resultSet;
+    public OdbcResultSet resultSet;
 
     public OdbcStatement(@NotNull OdbcConnection connection) throws OdbcException {
         this.connection = connection;

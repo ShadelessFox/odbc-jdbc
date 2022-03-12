@@ -64,12 +64,6 @@ public abstract class JDBC3Connection extends OdbcConnection {
     }
 
     @Override
-    public DatabaseMetaData getMetaData() throws SQLException {
-        ensureOpen();
-        throw new SQLFeatureNotSupportedException("getMetaData");
-    }
-
-    @Override
     public boolean isReadOnly() throws SQLException {
         throw new SQLFeatureNotSupportedException("isReadOnly");
     }
