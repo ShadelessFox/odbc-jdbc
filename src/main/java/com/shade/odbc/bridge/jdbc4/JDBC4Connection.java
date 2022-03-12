@@ -1,7 +1,7 @@
 package com.shade.odbc.bridge.jdbc4;
 
+import com.shade.odbc.bridge.OdbcDriver;
 import com.shade.odbc.bridge.jdbc3.JDBC3Connection;
-import com.shade.odbc.wrapper.OdbcHandle;
 import com.shade.util.NotNull;
 
 import java.sql.*;
@@ -9,8 +9,8 @@ import java.util.Properties;
 import java.util.concurrent.Executor;
 
 public class JDBC4Connection extends JDBC3Connection {
-    public JDBC4Connection(@NotNull OdbcHandle environment, @NotNull String connectionString, @NotNull Properties info) throws SQLException {
-        super(environment, connectionString, info);
+    public JDBC4Connection(@NotNull OdbcDriver driver, @NotNull String connectionString, @NotNull Properties info) throws SQLException {
+        super(driver, connectionString, info);
     }
 
     @Override

@@ -30,7 +30,8 @@ public class OdbcDataSource implements DataSource {
         if (password != null) {
             info.put("password", password);
         }
-        return OdbcDriver.createConnection(url, info);
+        // Having a driver singleton seems bogus but it will make it for now
+        return OdbcDriver.createConnection(OdbcDriver.INSTANCE, url, info);
     }
 
     @Override

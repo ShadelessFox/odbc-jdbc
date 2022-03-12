@@ -9,15 +9,22 @@ import com.shade.util.Nullable;
 import com.sun.jna.Pointer;
 
 import java.sql.*;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class OdbcDriver implements Driver {
     public static final String PREFIX = "jdbc:odbc:";
+    public static final OdbcDriver INSTANCE = new OdbcDriver();
+
+    private final Set<OdbcConnection> connections = new HashSet<>();
+    private OdbcHandle environment;
 
     static {
         try {
-            DriverManager.registerDriver(new OdbcDriver());
+            DriverManager.registerDriver(INSTANCE);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -25,7 +32,18 @@ public class OdbcDriver implements Driver {
 
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
-        return createConnection(url, info);
+        return createConnection(this, url, info);
+    }
+
+    public void disconnect(@NotNull OdbcConnection connection) throws SQLException {
+        if (!connections.contains(connection)) {
+            throw new SQLException("Connection was opened from another driver");
+        }
+        connections.remove(connection);
+        if (connections.isEmpty()) {
+            environment.close();
+            environment = null;
+        }
     }
 
     @Override
@@ -58,6 +76,11 @@ public class OdbcDriver implements Driver {
         return null;
     }
 
+    @NotNull
+    public OdbcHandle getEnvironment() {
+        return Objects.requireNonNull(environment, "Environment is not available");
+    }
+
     public static boolean isValidURL(@Nullable String url) {
         return url != null && url.toLowerCase().startsWith(PREFIX);
     }
@@ -68,11 +91,17 @@ public class OdbcDriver implements Driver {
     }
 
     @NotNull
-    public static Connection createConnection(String url, Properties info) throws SQLException {
+    public static Connection createConnection(@NotNull OdbcDriver driver, String url, Properties info) throws SQLException {
         if (!isValidURL(url)) {
             throw new SQLException("Invalid URL: " + url + ", expected prefix '" + PREFIX + "'");
         }
-        return new JDBC4Connection(createEnvironment(info), extractURL(url), info);
+        if (driver.environment == null) {
+            driver.environment = OdbcHandle.createEnvironmentHandle();
+            OdbcException.check(OdbcLibrary.INSTANCE.SQLSetEnvAttr(driver.environment.getPointer(), OdbcLibrary.SQL_ATTR_ODBC_VERSION, Pointer.createConstant(OdbcLibrary.SQL_OV_ODBC3), 0), "SQLSetEnvAttr", driver.environment);
+        }
+        final OdbcConnection connection = new JDBC4Connection(driver, extractURL(url), info);
+        driver.connections.add(connection);
+        return connection;
     }
 
     @NotNull

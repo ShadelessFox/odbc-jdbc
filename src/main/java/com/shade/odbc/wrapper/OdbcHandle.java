@@ -61,6 +61,19 @@ public class OdbcHandle implements AutoCloseable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OdbcHandle that = (OdbcHandle) o;
+        return Objects.equals(pointer, that.pointer);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pointer);
+    }
+
+    @Override
     public void close() throws OdbcException {
         if (pointer != null) {
             OdbcException.check("SQLFreeHandle", OdbcLibrary.INSTANCE.SQLFreeHandle(type.value, pointer), type.value, pointer);

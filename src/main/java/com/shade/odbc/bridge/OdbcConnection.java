@@ -13,11 +13,13 @@ import java.sql.*;
 import java.util.Properties;
 
 public abstract class OdbcConnection implements Connection {
+    private final OdbcDriver driver;
     private final OdbcHandle handle;
     private final OdbcDatabaseMetaData metaData;
 
-    public OdbcConnection(@NotNull OdbcHandle environment, @NotNull String connectionString, @NotNull Properties info) throws SQLException {
-        this.handle = OdbcHandle.createConnectionHandle(environment);
+    public OdbcConnection(@NotNull OdbcDriver driver, @NotNull String connectionString, @NotNull Properties info) throws SQLException {
+        this.driver = driver;
+        this.handle = OdbcHandle.createConnectionHandle(driver.getEnvironment());
         this.metaData = new OdbcDatabaseMetaData((JDBC4Connection) this);
 
         try {
@@ -96,12 +98,13 @@ public abstract class OdbcConnection implements Connection {
     }
 
     @Override
-    public void close() throws OdbcException {
+    public void close() throws SQLException {
         if (isClosed()) {
             return;
         }
         OdbcException.check(OdbcLibrary.INSTANCE.SQLDisconnect(handle.getPointer()), "SQLDisconnect", handle);
         handle.close();
+        driver.disconnect(this);
     }
 
     @Override
