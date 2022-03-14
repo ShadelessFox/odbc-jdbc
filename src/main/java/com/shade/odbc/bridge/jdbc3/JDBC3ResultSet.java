@@ -54,7 +54,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public byte[] getBytes(int columnIndex) throws SQLException {
-        final ByteArrayOutputStream result = getVariableLengthData(columnIndex, OdbcLibrary.SQL_BINARY, ByteArrayOutputStream::new, (mem, len) -> mem.getByteArray(0, len), ByteArrayOutputStream::writeBytes);
+        final ByteArrayOutputStream result = getVariableLengthData(columnIndex, Types.BINARY, ByteArrayOutputStream::new, (mem, len) -> mem.getByteArray(0, len), ByteArrayOutputStream::writeBytes);
         return result != null ? result.toByteArray() : null;
     }
 
@@ -65,8 +65,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public boolean getBoolean(int columnIndex) throws SQLException {
-        // TODO: Handle string representation
-        final Byte result = getData(columnIndex, OdbcLibrary.SQL_C_TINYINT, ByteByReference::new, ByteByReference::getValue);
+        final Byte result = getData(columnIndex, Types.BIT, ByteByReference::new, ByteByReference::getValue);
         return result != null && result > 0;
     }
 
@@ -77,7 +76,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public byte getByte(int columnIndex) throws SQLException {
-        final Byte result = getData(columnIndex, OdbcLibrary.SQL_C_TINYINT, ByteByReference::new, ByteByReference::getValue);
+        final Byte result = getData(columnIndex, Types.TINYINT, ByteByReference::new, ByteByReference::getValue);
         return result != null ? result : 0;
     }
 
@@ -88,7 +87,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public short getShort(int columnIndex) throws SQLException {
-        final Short result = getData(columnIndex, OdbcLibrary.SQL_C_SHORT, ShortByReference::new, ShortByReference::getValue);
+        final Short result = getData(columnIndex, Types.SMALLINT, ShortByReference::new, ShortByReference::getValue);
         return result != null ? result : 0;
     }
 
@@ -99,7 +98,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public int getInt(int columnIndex) throws SQLException {
-        final Integer result = getData(columnIndex, OdbcLibrary.SQL_C_LONG, IntByReference::new, IntByReference::getValue);
+        final Integer result = getData(columnIndex, Types.INTEGER, IntByReference::new, IntByReference::getValue);
         return result != null ? result : 0;
     }
 
@@ -110,7 +109,8 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public long getLong(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException("getLong");
+        final Long result = getData(columnIndex, Types.BIGINT, LongByReference::new, LongByReference::getValue);
+        return result != null ? result : 0;
     }
 
     @Override
@@ -120,7 +120,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public float getFloat(int columnIndex) throws SQLException {
-        final Float result = getData(columnIndex, OdbcLibrary.SQL_C_FLOAT, FloatByReference::new, FloatByReference::getValue);
+        final Float result = getData(columnIndex, Types.FLOAT, FloatByReference::new, FloatByReference::getValue);
         return result != null ? result : 0.0f;
     }
 
@@ -131,7 +131,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public double getDouble(int columnIndex) throws SQLException {
-        final Double result = getData(columnIndex, OdbcLibrary.SQL_C_DOUBLE, DoubleByReference::new, DoubleByReference::getValue);
+        final Double result = getData(columnIndex, Types.DOUBLE, DoubleByReference::new, DoubleByReference::getValue);
         return result != null ? result : 0.0;
     }
 
@@ -157,7 +157,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public Date getDate(int columnIndex, Calendar cal) throws SQLException {
-        final OdbcLibrary.Date result = getData(columnIndex, OdbcLibrary.SQL_C_TYPE_DATE, OdbcLibrary.Date::new);
+        final OdbcLibrary.Date result = getData(columnIndex, Types.DATE, OdbcLibrary.Date::new);
         if (result == null) {
             return null;
         }
@@ -181,7 +181,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public Time getTime(int columnIndex, Calendar cal) throws SQLException {
-        final OdbcLibrary.Time result = getData(columnIndex, OdbcLibrary.SQL_C_TYPE_TIME, OdbcLibrary.Time::new);
+        final OdbcLibrary.Time result = getData(columnIndex, Types.TIME, OdbcLibrary.Time::new);
         if (result == null) {
             return null;
         }
@@ -205,7 +205,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
 
     @Override
     public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
-        final OdbcLibrary.Timestamp result = getData(columnIndex, OdbcLibrary.SQL_C_TYPE_TIMESTAMP, OdbcLibrary.Timestamp::new);
+        final OdbcLibrary.Timestamp result = getData(columnIndex, Types.TIMESTAMP, OdbcLibrary.Timestamp::new);
         if (result == null) {
             return null;
         }
@@ -259,29 +259,31 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     public Object getObject(int columnIndex) throws SQLException {
         final int type = getMetaData().getColumnType(columnIndex);
         switch (type) {
-            case OdbcLibrary.SQL_CHAR:
-            case OdbcLibrary.SQL_VARCHAR:
-            case OdbcLibrary.SQL_LONGVARCHAR:
-            case OdbcLibrary.SQL_WCHAR:
-            case OdbcLibrary.SQL_WVARCHAR:
-            case OdbcLibrary.SQL_WLONGVARCHAR:
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.NCHAR:
+            case Types.NVARCHAR:
+            case Types.LONGNVARCHAR:
                 return getString(columnIndex);
-            case OdbcLibrary.SQL_TINYINT:
+            case Types.TINYINT:
                 return getByte(columnIndex);
-            case OdbcLibrary.SQL_SMALLINT:
+            case Types.SMALLINT:
                 return getShort(columnIndex);
-            case OdbcLibrary.SQL_INTEGER:
+            case Types.INTEGER:
                 return getInt(columnIndex);
-            case OdbcLibrary.SQL_FLOAT:
-            case OdbcLibrary.SQL_REAL:
+            case Types.BIGINT:
+                return getLong(columnIndex);
+            case Types.FLOAT:
+            case Types.REAL:
                 return getFloat(columnIndex);
-            case OdbcLibrary.SQL_DOUBLE:
+            case Types.DOUBLE:
                 return getDouble(columnIndex);
-            case OdbcLibrary.SQL_DATE:
+            case Types.DATE:
                 return getDate(columnIndex);
-            case OdbcLibrary.SQL_TIME:
+            case Types.TIME:
                 return getTime(columnIndex);
-            case OdbcLibrary.SQL_TIMESTAMP:
+            case Types.TIMESTAMP:
                 return getTimestamp(columnIndex);
             default:
                 throw new OdbcException("Can't determine Java type for SQL type " + type);
@@ -789,14 +791,14 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     }
 
     @Nullable
-    private <R extends Structure> R getData(int columnIndex, short targetType, @NotNull Supplier<R> supplier) throws SQLException {
+    private <R extends Structure> R getData(int columnIndex, int targetType, @NotNull Supplier<R> supplier) throws SQLException {
         ensureOpen();
         ensureColumn(columnIndex);
 
         final R container = supplier.get();
         final IntByReference length = new IntByReference();
 
-        OdbcException.check(OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, targetType, container, container.size(), length), "SQLGetData", getStatement().getHandle());
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, (short) targetType, container, container.size(), length), "SQLGetData", getStatement().getHandle());
 
         if (length.getValue() == OdbcLibrary.SQL_NULL_DATA) {
             wasNull = true;
@@ -808,14 +810,14 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     }
 
     @Nullable
-    private <T extends ByReference, R> R getData(int columnIndex, short targetType, @NotNull Supplier<T> supplier, @NotNull Function<T, R> extractor) throws SQLException {
+    private <T extends ByReference, R> R getData(int columnIndex, int targetType, @NotNull Supplier<T> supplier, @NotNull Function<T, R> extractor) throws SQLException {
         ensureOpen();
         ensureColumn(columnIndex);
 
         final T container = supplier.get();
         final IntByReference length = new IntByReference();
 
-        OdbcException.check(OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, targetType, container, 0, length), "SQLGetData", getStatement().getHandle());
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, (short) targetType, container, 0, length), "SQLGetData", getStatement().getHandle());
 
         if (length.getValue() == OdbcLibrary.SQL_NULL_DATA) {
             wasNull = true;
@@ -827,7 +829,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     }
 
     @Nullable
-    private <T, R> R getVariableLengthData(int columnIndex, short targetType, @NotNull Supplier<R> supplier, @NotNull BiFunction<Memory, Integer, T> extractor, @NotNull BiConsumer<R, T> accumulator) throws SQLException {
+    private <T, R> R getVariableLengthData(int columnIndex, int targetType, @NotNull Supplier<R> supplier, @NotNull BiFunction<Memory, Integer, T> extractor, @NotNull BiConsumer<R, T> accumulator) throws SQLException {
         ensureOpen();
         ensureColumn(columnIndex);
 
@@ -836,7 +838,7 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
         final R result = supplier.get();
 
         while (true) {
-            final short rc = OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, targetType, buffer, (int) (buffer.size() - 1), length);
+            final short rc = OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, (short) targetType, buffer, (int) (buffer.size() - 1), length);
             final int remaining;
 
             if (rc == OdbcLibrary.SQL_NO_DATA) {

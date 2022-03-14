@@ -25,58 +25,9 @@ public interface OdbcLibrary extends Library {
     short SQL_TRUE = 1;
     short SQL_FALSE = 0;
 
-    short SQL_CHAR = 1;
-    short SQL_VARCHAR = 12;
-    short SQL_LONGVARCHAR = -1;
-
-    short SQL_NUMERIC = 2;
-    short SQL_DECIMAL = 3;
-    short SQL_INTEGER = 4;
-    short SQL_SMALLINT = 5;
-    short SQL_FLOAT = 6;
-    short SQL_REAL = 7;
-    short SQL_DOUBLE = 8;
-    short SQL_DATE = 9;
-    short SQL_INTERVAL = 10;
-    short SQL_TIME = 10;
-    short SQL_TIMESTAMP = 11;
-
-    short SQL_TYPE_DATE = 91;
-    short SQL_TYPE_TIME = 92;
-    short SQL_TYPE_TIMESTAMP = 93;
-
-    short SQL_C_TYPE_DATE = SQL_TYPE_DATE;
-    short SQL_C_TYPE_TIME = SQL_TYPE_TIME;
-    short SQL_C_TYPE_TIMESTAMP = SQL_TYPE_TIMESTAMP;
-
-    short SQL_BINARY = -2;
-    short SQL_VARBINARY = -3;
-    short SQL_LONGVARBINARY = -4;
-    short SQL_BIGINT = -5;
-    short SQL_TINYINT = -6;
-    short SQL_BIT = -7;
     short SQL_WCHAR = -8;
     short SQL_WVARCHAR = -9;
     short SQL_WLONGVARCHAR = -10;
-
-    short SQL_C_CHAR = SQL_CHAR;
-    short SQL_C_LONG = SQL_INTEGER;
-    short SQL_C_SHORT = SQL_SMALLINT;
-    short SQL_C_FLOAT = SQL_REAL;
-    short SQL_C_DOUBLE = SQL_DOUBLE;
-
-    short SQL_SIGNED_OFFSET = -20;
-    short SQL_UNSIGNED_OFFSET = -22;
-
-    short SQL_C_SBIGINT = SQL_BIGINT + SQL_SIGNED_OFFSET;
-    short SQL_C_UBIGINT = SQL_BIGINT + SQL_UNSIGNED_OFFSET;
-    short SQL_C_TINYINT = SQL_TINYINT;
-    short SQL_C_SLONG = SQL_C_LONG + SQL_SIGNED_OFFSET;
-    short SQL_C_SSHORT = SQL_C_SHORT + SQL_SIGNED_OFFSET;
-    short SQL_C_STINYINT = SQL_TINYINT + SQL_SIGNED_OFFSET;
-    short SQL_C_ULONG = SQL_C_LONG + SQL_UNSIGNED_OFFSET;
-    short SQL_C_USHORT = SQL_C_SHORT + SQL_UNSIGNED_OFFSET;
-    short SQL_C_UTINYINT = SQL_TINYINT + SQL_UNSIGNED_OFFSET;
 
     short SQL_DRIVER_NOPROMPT = 0;
     short SQL_DRIVER_COMPLETE = 1;
