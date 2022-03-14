@@ -40,7 +40,10 @@ public class OdbcException extends SQLException {
 
         OdbcException root = null;
 
-        for (short index = 1; ; index++) {
+        // Some drivers may crash if you call SQLGetDiagRecW more than once.
+        // So reduce the amount of calls to just one. Is there a workaround?
+
+        for (short index = 1; index <= 1; index++) {
             message.setByte(0, (byte) 0);
             state.setByte(0, (byte) 0);
 
