@@ -96,16 +96,6 @@ public abstract class JDBC3Connection extends OdbcConnection {
     }
 
     @Override
-    public SQLWarning getWarnings() throws SQLException {
-        throw new SQLFeatureNotSupportedException("getWarnings");
-    }
-
-    @Override
-    public void clearWarnings() throws SQLException {
-        throw new SQLFeatureNotSupportedException("clearWarnings");
-    }
-
-    @Override
     public Map<String, Class<?>> getTypeMap() throws SQLException {
         throw new SQLFeatureNotSupportedException("getTypeMap");
     }

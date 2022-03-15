@@ -1,5 +1,6 @@
-package com.shade.odbc.bridge;
+package com.shade.odbc.bridge.meta;
 
+import com.shade.odbc.bridge.OdbcStatement;
 import com.shade.odbc.bridge.jdbc4.JDBC4Connection;
 import com.shade.odbc.bridge.jdbc4.JDBC4ResultSet;
 import com.shade.odbc.wrapper.OdbcException;
@@ -626,7 +627,7 @@ public class OdbcDatabaseMetaData implements DatabaseMetaData {
             schemaPattern == null ? null : new WString(schemaPattern), OdbcLibrary.SQL_NTS,
             tableNamePattern == null ? null : new WString(tableNamePattern), OdbcLibrary.SQL_NTS,
             types == null ? null : new WString(String.join(",", types)), OdbcLibrary.SQL_NTS
-        ), "SQLTables", statement.getHandle());
+        ), statement.getHandle());
 
         return statement.resultSet = new JDBC4ResultSet(statement);
     }
@@ -641,7 +642,7 @@ public class OdbcDatabaseMetaData implements DatabaseMetaData {
             schemaPattern == null ? null : new WString(schemaPattern), OdbcLibrary.SQL_NTS,
             tableNamePattern == null ? null : new WString(tableNamePattern), OdbcLibrary.SQL_NTS,
             columnNamePattern == null ? null : new WString(columnNamePattern), OdbcLibrary.SQL_NTS
-        ), "SQLColumns", statement.getHandle());
+        ), statement.getHandle());
 
         return statement.resultSet = new JDBC4ResultSet(statement);
 

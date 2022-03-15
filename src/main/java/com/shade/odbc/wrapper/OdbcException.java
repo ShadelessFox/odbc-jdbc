@@ -3,36 +3,47 @@ package com.shade.odbc.wrapper;
 import com.shade.util.NotNull;
 import com.shade.util.Nullable;
 import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.ShortByReference;
 
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 
 public class OdbcException extends SQLException {
-    private final String functionName;
-
     public OdbcException(String reason) {
-        this(reason, null, null, 0);
+        this(reason, null, 0);
     }
 
-    public OdbcException(@NotNull String reason, @Nullable String state, @Nullable String functionName, int vendorCode) {
+    public OdbcException(@NotNull String reason, @Nullable String state, int vendorCode) {
         super(reason, state, vendorCode);
-        this.functionName = functionName;
     }
 
-    public static void check(int rc, @NotNull String function, @NotNull OdbcHandle handle) throws OdbcException {
-        check(function, rc, handle.getType().getValue(), handle.getPointer());
-    }
-
-    public static void check(@NotNull String function, int rc, short handleType, @NotNull Pointer handle) throws OdbcException {
+    public static void check(int rc, @NotNull OdbcHandle handle) throws SQLException {
         if (succeeded(rc)) {
             return;
         }
-        makeFromDiagnostics(function, handleType, handle);
+        final OdbcException exception = diagnose(handle);
+        if (exception != null) {
+            throw exception;
+        }
+        switch (rc) {
+            case OdbcLibrary.SQL_INVALID_HANDLE:
+                throw new OdbcException("Invalid handle: " + handle.getType(), null, 0);
+            case OdbcLibrary.SQL_NEED_DATA:
+                throw new OdbcException("Need data", null, 0);
+            case OdbcLibrary.SQL_NO_DATA:
+                throw new OdbcException("No data", null, 0);
+            default:
+                throw new OdbcException("Unknown error", null, 0);
+        }
     }
 
-    public static void makeFromDiagnostics(@NotNull String function, short handleType, @NotNull Pointer handle) throws OdbcException {
+    @Nullable
+    public static OdbcException diagnose(@NotNull OdbcHandle handle) {
+        if (handle.isClosed()) {
+            return null;
+        }
+
         final ShortByReference messageLength = new ShortByReference();
         final IntByReference nativeError = new IntByReference();
         final Memory message = new Memory(250 * Character.BYTES);
@@ -47,7 +58,7 @@ public class OdbcException extends SQLException {
             message.setByte(0, (byte) 0);
             state.setByte(0, (byte) 0);
 
-            if (!succeeded(OdbcLibrary.INSTANCE.SQLGetDiagRecW(handleType, handle, index, state, nativeError, message, (short) (message.size() - 1), messageLength))) {
+            if (!succeeded(OdbcLibrary.INSTANCE.SQLGetDiagRecW(handle.getType().getCode(), handle.getPointer(), index, state, nativeError, message, (short) (message.size() - 1), messageLength))) {
                 break;
             }
 
@@ -55,7 +66,7 @@ public class OdbcException extends SQLException {
             state.setByte(state.size() - 1, (byte) 0);
 
             if (messageLength.getValue() != 0) {
-                final OdbcException exception = new OdbcException(message.getWideString(0), state.getWideString(0), function, nativeError.getValue());
+                final OdbcException exception = new OdbcException(message.getWideString(0), state.getWideString(0), nativeError.getValue());
                 if (root == null) {
                     root = exception;
                 } else {
@@ -64,11 +75,12 @@ public class OdbcException extends SQLException {
             }
         }
 
-        if (root == null) {
-            root = new OdbcException("Unknown error", null, function, 0);
-        }
+        return root;
+    }
 
-        throw root;
+    @NotNull
+    public SQLWarning toWarning() {
+        return new SQLWarning(getMessage(), getSQLState(), getErrorCode());
     }
 
     public static boolean succeeded(int rc) {

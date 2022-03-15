@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet {
     private boolean wasNull;
 
-    public JDBC3ResultSet(@NotNull OdbcStatement statement) throws OdbcException {
+    public JDBC3ResultSet(@NotNull OdbcStatement statement) throws SQLException {
         super(statement);
     }
 
@@ -262,9 +262,9 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
             case Types.CHAR:
             case Types.VARCHAR:
             case Types.LONGVARCHAR:
-            case Types.NCHAR:
-            case Types.NVARCHAR:
-            case Types.LONGNVARCHAR:
+            case OdbcLibrary.SQL_WCHAR:
+            case OdbcLibrary.SQL_WVARCHAR:
+            case OdbcLibrary.SQL_WLONGVARCHAR:
                 return getString(columnIndex);
             case Types.TINYINT:
                 return getByte(columnIndex);
@@ -736,16 +736,6 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
     }
 
     @Override
-    public SQLWarning getWarnings() throws SQLException {
-        throw new SQLFeatureNotSupportedException("getWarnings");
-    }
-
-    @Override
-    public void clearWarnings() throws SQLException {
-        throw new SQLFeatureNotSupportedException("clearWarnings");
-    }
-
-    @Override
     public String getCursorName() throws SQLException {
         throw new SQLFeatureNotSupportedException("getCursorName");
     }
@@ -780,16 +770,6 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
         throw new SQLFeatureNotSupportedException("getConcurrency");
     }
 
-    @Override
-    public boolean isWrapperFor(Class<?> iface) {
-        return iface.isInstance(this);
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> iface) {
-        return iface.cast(this);
-    }
-
     @Nullable
     private <R extends Structure> R getData(int columnIndex, int targetType, @NotNull Supplier<R> supplier) throws SQLException {
         ensureOpen();
@@ -798,7 +778,13 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
         final R container = supplier.get();
         final IntByReference length = new IntByReference();
 
-        OdbcException.check(OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, (short) targetType, container, container.size(), length), "SQLGetData", getStatement().getHandle());
+        final short rc = OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, (short) targetType, container, container.size(), length);
+
+        if (rc == OdbcLibrary.SQL_SUCCESS_WITH_INFO) {
+            addWarning();
+        }
+
+        OdbcException.check(rc, getStatement().getHandle());
 
         if (length.getValue() == OdbcLibrary.SQL_NULL_DATA) {
             wasNull = true;
@@ -817,7 +803,13 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
         final T container = supplier.get();
         final IntByReference length = new IntByReference();
 
-        OdbcException.check(OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, (short) targetType, container, 0, length), "SQLGetData", getStatement().getHandle());
+        final short rc = OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, (short) targetType, container, 0, length);
+
+        if (rc == OdbcLibrary.SQL_SUCCESS_WITH_INFO) {
+            addWarning();
+        }
+
+        OdbcException.check(rc, getStatement().getHandle());
 
         if (length.getValue() == OdbcLibrary.SQL_NULL_DATA) {
             wasNull = true;
@@ -841,12 +833,14 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
             final short rc = OdbcLibrary.INSTANCE.SQLGetData(getStatement().getHandle().getPointer(), (short) columnIndex, (short) targetType, buffer, (int) (buffer.size() - 1), length);
             final int remaining;
 
-            if (rc == OdbcLibrary.SQL_NO_DATA) {
+            if (rc == OdbcLibrary.SQL_SUCCESS_WITH_INFO) {
+                addWarning();
+            } else if (rc == OdbcLibrary.SQL_NO_DATA) {
                 wasNull = false;
                 return result;
             }
 
-            OdbcException.check(rc, "SQLGetData", getStatement().getHandle());
+            OdbcException.check(rc, getStatement().getHandle());
 
             switch (length.getValue()) {
                 case OdbcLibrary.SQL_NULL_DATA:

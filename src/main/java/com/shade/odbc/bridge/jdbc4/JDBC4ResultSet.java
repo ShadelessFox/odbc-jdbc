@@ -10,7 +10,7 @@ import java.io.Reader;
 import java.sql.*;
 
 public class JDBC4ResultSet extends JDBC3ResultSet {
-    public JDBC4ResultSet(@NotNull OdbcStatement statement) throws OdbcException {
+    public JDBC4ResultSet(@NotNull OdbcStatement statement) throws SQLException {
         super(statement);
     }
 

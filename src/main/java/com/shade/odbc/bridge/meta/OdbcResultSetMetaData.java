@@ -1,5 +1,6 @@
-package com.shade.odbc.bridge;
+package com.shade.odbc.bridge.meta;
 
+import com.shade.odbc.bridge.OdbcStatement;
 import com.shade.odbc.wrapper.OdbcException;
 import com.shade.odbc.wrapper.OdbcHandle;
 import com.shade.odbc.wrapper.OdbcLibrary;
@@ -18,9 +19,9 @@ public class OdbcResultSetMetaData implements ResultSetMetaData {
     private final ColumnMetaData[] columns;
     private final Map<String, Integer> indexes;
 
-    public OdbcResultSetMetaData(@NotNull OdbcStatement statement) throws OdbcException {
+    public OdbcResultSetMetaData(@NotNull OdbcStatement statement) throws SQLException {
         final ShortByReference count = new ShortByReference();
-        OdbcException.check(OdbcLibrary.INSTANCE.SQLNumResultCols(statement.getHandle().getPointer(), count), "SQLNumResultCols", statement.getHandle());
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLNumResultCols(statement.getHandle().getPointer(), count), statement.getHandle());
 
         this.columns = new ColumnMetaData[count.getValue()];
         this.indexes = new HashMap<>(columns.length);
@@ -188,7 +189,7 @@ public class OdbcResultSetMetaData implements ResultSetMetaData {
         private final boolean searchable;
         private final boolean currency;
 
-        public ColumnMetaData(@NotNull OdbcHandle handle, short column) throws OdbcException {
+        public ColumnMetaData(@NotNull OdbcHandle handle, short column) throws SQLException {
             this.label = getStringAttribute(handle, column, OdbcLibrary.SQL_COLUMN_LABEL);
             this.name = getStringAttribute(handle, column, OdbcLibrary.SQL_DESC_NAME);
             this.typeName = getStringAttribute(handle, column, OdbcLibrary.SQL_COLUMN_TYPE_NAME);
@@ -209,25 +210,25 @@ public class OdbcResultSetMetaData implements ResultSetMetaData {
         }
 
         @NotNull
-        private static String getStringAttribute(@NotNull OdbcHandle handle, short column, short attribute) throws OdbcException {
+        private static String getStringAttribute(@NotNull OdbcHandle handle, short column, short attribute) throws SQLException {
             final Memory buffer = new Memory(1024);
             OdbcException.check(
-                OdbcLibrary.INSTANCE.SQLColAttributeW(handle.getPointer(), column, attribute, buffer, (short) (buffer.size() - 1), null, null), "SQLColAttributeW",
+                OdbcLibrary.INSTANCE.SQLColAttributeW(handle.getPointer(), column, attribute, buffer, (short) (buffer.size() - 1), null, null),
                 handle
             );
             return buffer.getWideString(0);
         }
 
-        private static int getNumericAttribute(@NotNull OdbcHandle handle, short column, short attribute) throws OdbcException {
+        private static int getNumericAttribute(@NotNull OdbcHandle handle, short column, short attribute) throws SQLException {
             final IntByReference value = new IntByReference();
             OdbcException.check(
-                OdbcLibrary.INSTANCE.SQLColAttributeW(handle.getPointer(), column, attribute, null, (short) 0, null, value), "SQLColAttributeW",
+                OdbcLibrary.INSTANCE.SQLColAttributeW(handle.getPointer(), column, attribute, null, (short) 0, null, value),
                 handle
             );
             return value.getValue();
         }
 
-        private static boolean getBooleanAttribute(@NotNull OdbcHandle handle, short column, short attribute) throws OdbcException {
+        private static boolean getBooleanAttribute(@NotNull OdbcHandle handle, short column, short attribute) throws SQLException {
             return getNumericAttribute(handle, column, attribute) == OdbcLibrary.SQL_TRUE;
         }
     }

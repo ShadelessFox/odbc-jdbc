@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
 public class JDBC4Statement extends JDBC3Statement {
-    public JDBC4Statement(@NotNull OdbcConnection connection, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws OdbcException {
+    public JDBC4Statement(@NotNull OdbcConnection connection, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
         super(connection, resultSetType, resultSetConcurrency, resultSetHoldability);
     }
 

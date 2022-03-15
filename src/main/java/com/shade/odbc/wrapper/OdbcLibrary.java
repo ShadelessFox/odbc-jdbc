@@ -16,9 +16,15 @@ public interface OdbcLibrary extends Library {
     short SQL_ATTR_AUTOCOMMIT = 102;
     short SQL_NTS = -3;
 
+    // Return Codes
     short SQL_SUCCESS = 0;
     short SQL_SUCCESS_WITH_INFO = 1;
+    short SQL_STILL_EXECUTING = 2;
+    short SQL_ERROR = -1;
+    short SQL_INVALID_HANDLE = -2;
+    short SQL_NEED_DATA = 99;
     short SQL_NO_DATA = 100;
+
     short SQL_NULL_DATA = -1;
     short SQL_NO_TOTAL = -4;
 

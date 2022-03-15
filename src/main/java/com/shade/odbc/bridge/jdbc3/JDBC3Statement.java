@@ -12,7 +12,7 @@ public abstract class JDBC3Statement extends OdbcStatement implements Statement 
     private final int resultSetConcurrency;
     private final int resultSetHoldability;
 
-    public JDBC3Statement(@NotNull OdbcConnection connection, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws OdbcException {
+    public JDBC3Statement(@NotNull OdbcConnection connection, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
         super(connection);
         this.resultSetType = resultSetType;
         this.resultSetConcurrency = resultSetConcurrency;
@@ -116,16 +116,6 @@ public abstract class JDBC3Statement extends OdbcStatement implements Statement 
     @Override
     public void setQueryTimeout(int seconds) throws SQLException {
         throw new SQLFeatureNotSupportedException("setQueryTimeout");
-    }
-
-    @Override
-    public SQLWarning getWarnings() throws SQLException {
-        throw new SQLFeatureNotSupportedException("getWarnings");
-    }
-
-    @Override
-    public void clearWarnings() throws SQLException {
-        throw new SQLFeatureNotSupportedException("clearWarnings");
     }
 
     @Override

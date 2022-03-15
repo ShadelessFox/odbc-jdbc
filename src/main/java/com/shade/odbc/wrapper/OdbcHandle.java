@@ -5,6 +5,7 @@ import com.shade.util.Nullable;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
+import java.sql.SQLException;
 import java.util.Objects;
 
 public class OdbcHandle implements AutoCloseable {
@@ -17,12 +18,12 @@ public class OdbcHandle implements AutoCloseable {
     }
 
     @NotNull
-    public static OdbcHandle createEnvironmentHandle() throws OdbcException {
+    public static OdbcHandle createEnvironmentHandle() throws SQLException {
         return create(Type.ENVIRONMENT, null);
     }
 
     @NotNull
-    public static OdbcHandle createConnectionHandle(@NotNull OdbcHandle environment) throws OdbcException {
+    public static OdbcHandle createConnectionHandle(@NotNull OdbcHandle environment) throws SQLException {
         if (environment.type != Type.ENVIRONMENT) {
             throw new OdbcException("Input handle is not an environment handle");
         }
@@ -30,7 +31,7 @@ public class OdbcHandle implements AutoCloseable {
     }
 
     @NotNull
-    public static OdbcHandle createStatementHandle(@NotNull OdbcHandle connection) throws OdbcException {
+    public static OdbcHandle createStatementHandle(@NotNull OdbcHandle connection) throws SQLException {
         if (connection.type != Type.CONNECTION) {
             throw new OdbcException("Input handle is not a connection handle");
         }
@@ -38,12 +39,12 @@ public class OdbcHandle implements AutoCloseable {
     }
 
     @NotNull
-    private static OdbcHandle create(@NotNull Type type, @Nullable OdbcHandle input) throws OdbcException {
+    private static OdbcHandle create(@NotNull Type type, @Nullable OdbcHandle input) throws SQLException {
         final PointerByReference output = new PointerByReference();
-        if (OdbcException.succeeded(OdbcLibrary.INSTANCE.SQLAllocHandle(type.value, input != null ? input.pointer : null, output))) {
+        if (OdbcException.succeeded(OdbcLibrary.INSTANCE.SQLAllocHandle(type.code, input != null ? input.pointer : null, output))) {
             return new OdbcHandle(type, output.getValue());
         }
-        throw new OdbcException("Can't allocate handle of type " + type, null, "SQLAllocHandle", 0);
+        throw new OdbcException("Can't allocate handle of type " + type, null, 0);
     }
 
     @NotNull
@@ -74,9 +75,9 @@ public class OdbcHandle implements AutoCloseable {
     }
 
     @Override
-    public void close() throws OdbcException {
+    public void close() throws SQLException {
         if (pointer != null) {
-            OdbcException.check("SQLFreeHandle", OdbcLibrary.INSTANCE.SQLFreeHandle(type.value, pointer), type.value, pointer);
+            OdbcException.check(OdbcLibrary.INSTANCE.SQLFreeHandle(type.code, pointer), this);
             pointer = null;
         }
     }
@@ -87,14 +88,14 @@ public class OdbcHandle implements AutoCloseable {
         STATEMENT(OdbcLibrary.SQL_HANDLE_STMT),
         DESCRIPTION(OdbcLibrary.SQL_HANDLE_DESC);
 
-        private final short value;
+        private final short code;
 
-        Type(short value) {
-            this.value = value;
+        Type(short code) {
+            this.code = code;
         }
 
-        public short getValue() {
-            return value;
+        public short getCode() {
+            return code;
         }
     }
 }
