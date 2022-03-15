@@ -608,13 +608,44 @@ public class OdbcDatabaseMetaData implements DatabaseMetaData {
     }
 
     @Override
+    public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
+        // NOTE: ODBC does not distinguish between procedures and functions
+        return getProcedures(catalog, schemaPattern, functionNamePattern);
+    }
+
+    @Override
+    public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern) throws SQLException {
+        // NOTE: ODBC does not distinguish between procedures and functions
+        return getProcedureColumns(catalog, schemaPattern, functionNamePattern, columnNamePattern);
+    }
+
+    @Override
     public ResultSet getProcedures(String catalog, String schemaPattern, String procedureNamePattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        final OdbcStatement statement = (OdbcStatement) connection.createStatement();
+
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLProceduresW(
+            statement.getHandle().getPointer(),
+            catalog == null ? null : new WString(catalog), OdbcLibrary.SQL_NTS,
+            schemaPattern == null ? null : new WString(schemaPattern), OdbcLibrary.SQL_NTS,
+            procedureNamePattern == null ? null : new WString(procedureNamePattern), OdbcLibrary.SQL_NTS
+        ), statement.getHandle());
+
+        return statement.resultSet = new JDBC4ResultSet(statement);
     }
 
     @Override
     public ResultSet getProcedureColumns(String catalog, String schemaPattern, String procedureNamePattern, String columnNamePattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        final OdbcStatement statement = (OdbcStatement) connection.createStatement();
+
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLProcedureColumnsW(
+            statement.getHandle().getPointer(),
+            catalog == null ? null : new WString(catalog), OdbcLibrary.SQL_NTS,
+            schemaPattern == null ? null : new WString(schemaPattern), OdbcLibrary.SQL_NTS,
+            procedureNamePattern == null ? null : new WString(procedureNamePattern), OdbcLibrary.SQL_NTS,
+            columnNamePattern == null ? null : new WString(columnNamePattern), OdbcLibrary.SQL_NTS
+        ), statement.getHandle());
+
+        return statement.resultSet = new JDBC4ResultSet(statement);
     }
 
     @Override
@@ -885,16 +916,6 @@ public class OdbcDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getClientInfoProperties() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 

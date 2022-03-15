@@ -110,6 +110,10 @@ public interface OdbcLibrary extends Library {
 
     short SQLColumnsW(Pointer StatementHandle, WString CatalogName, short NameLength1, WString SchemaName, short NameLength2, WString TableName, short NameLength3, WString ColumnName, short NameLength4);
 
+    short SQLProceduresW(Pointer StatementHandle, WString CatalogName, short CatalogNameLength, WString SchemaName, short SchemaNameLength, WString ProcName, short ProcNameLength);
+
+    short SQLProcedureColumnsW(Pointer StatementHandle, WString CatalogName, short CatalogNameLength, WString SchemaName, short SchemaNameLength, WString ProcName, short ProcNameLength, WString ColumnName, short ColumnNameLength);
+
     short SQLGetDiagRecW(short HandleType, Pointer Handle, short RecNumber, Pointer SQLState, IntByReference NativeErrorPtr, Pointer MessageText, short BufferLength, ShortByReference TextLengthPtr);
 
     short SQLGetEnvAttr(Pointer EnvironmentHandle, int Attribute, Pointer Value, int BufferLength, IntByReference StringLength);
