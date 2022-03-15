@@ -14,6 +14,7 @@ public interface OdbcLibrary extends Library {
 
     short SQL_ATTR_ODBC_VERSION = 200;
     short SQL_ATTR_AUTOCOMMIT = 102;
+    short SQL_ATTR_TXN_ISOLATION = 108;
     short SQL_ATTR_CURRENT_CATALOG = 109;
     short SQL_NTS = -3;
 

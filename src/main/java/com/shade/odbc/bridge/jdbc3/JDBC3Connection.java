@@ -6,6 +6,8 @@ import com.shade.odbc.wrapper.OdbcException;
 import com.shade.odbc.wrapper.OdbcLibrary;
 import com.shade.util.NotNull;
 import com.sun.jna.Memory;
+import com.sun.jna.Pointer;
+import com.sun.jna.ptr.IntByReference;
 
 import java.sql.*;
 import java.util.Map;
@@ -92,14 +94,19 @@ public abstract class JDBC3Connection extends OdbcConnection {
         OdbcException.check(OdbcLibrary.INSTANCE.SQLSetConnectAttr(handle.getPointer(), OdbcLibrary.SQL_ATTR_CURRENT_CATALOG, catalog, OdbcLibrary.SQL_NTS), handle);
     }
 
+    @SuppressWarnings("MagicConstant")
     @Override
     public int getTransactionIsolation() throws SQLException {
-        throw new SQLFeatureNotSupportedException("getTransactionIsolation");
+        ensureOpen();
+        final IntByReference value = new IntByReference();
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLGetConnectAttr(handle.getPointer(), OdbcLibrary.SQL_ATTR_TXN_ISOLATION, value, 0, null), handle);
+        return value.getValue();
     }
 
     @Override
     public void setTransactionIsolation(int level) throws SQLException {
-        throw new SQLFeatureNotSupportedException("setTransactionIsolation");
+        ensureOpen();
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLSetConnectAttr(handle.getPointer(), OdbcLibrary.SQL_ATTR_TXN_ISOLATION, Pointer.createConstant(level), 0), handle);
     }
 
     @Override
