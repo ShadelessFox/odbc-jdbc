@@ -14,6 +14,7 @@ public interface OdbcLibrary extends Library {
 
     short SQL_ATTR_ODBC_VERSION = 200;
     short SQL_ATTR_AUTOCOMMIT = 102;
+    short SQL_ATTR_CURRENT_CATALOG = 109;
     short SQL_NTS = -3;
 
     // Return Codes
@@ -117,7 +118,11 @@ public interface OdbcLibrary extends Library {
 
     short SQLGetConnectAttr(Pointer ConnectionHandle, int Attribute, ByReference Value, int BufferLength, IntByReference StringLengthPtr);
 
+    short SQLGetConnectAttr(Pointer ConnectionHandle, int Attribute, Pointer Value, int BufferLength, IntByReference StringLengthPtr);
+
     short SQLSetConnectAttr(Pointer ConnectionHandle, int Attribute, Pointer Value, int StringLength);
+
+    short SQLSetConnectAttr(Pointer ConnectionHandle, int Attribute, String Value, int StringLength);
 
     short SQLGetStmtAttr(Pointer StatementHandle, int Attribute, Pointer Value, int BufferLength, IntByReference StringLength);
 

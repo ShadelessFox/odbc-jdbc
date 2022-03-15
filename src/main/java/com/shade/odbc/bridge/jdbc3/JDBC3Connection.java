@@ -2,7 +2,10 @@ package com.shade.odbc.bridge.jdbc3;
 
 import com.shade.odbc.bridge.OdbcConnection;
 import com.shade.odbc.bridge.OdbcDriver;
+import com.shade.odbc.wrapper.OdbcException;
+import com.shade.odbc.wrapper.OdbcLibrary;
 import com.shade.util.NotNull;
+import com.sun.jna.Memory;
 
 import java.sql.*;
 import java.util.Map;
@@ -77,12 +80,16 @@ public abstract class JDBC3Connection extends OdbcConnection {
 
     @Override
     public String getCatalog() throws SQLException {
-        throw new SQLFeatureNotSupportedException("getCatalog");
+        ensureOpen();
+        final Memory memory = new Memory(250 * Byte.BYTES);
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLGetConnectAttr(handle.getPointer(), OdbcLibrary.SQL_ATTR_CURRENT_CATALOG, memory, (int) (memory.size() - 1), null), handle);
+        return memory.getString(0);
     }
 
     @Override
     public void setCatalog(String catalog) throws SQLException {
-        throw new SQLFeatureNotSupportedException("setCatalog");
+        ensureOpen();
+        OdbcException.check(OdbcLibrary.INSTANCE.SQLSetConnectAttr(handle.getPointer(), OdbcLibrary.SQL_ATTR_CURRENT_CATALOG, catalog, OdbcLibrary.SQL_NTS), handle);
     }
 
     @Override
