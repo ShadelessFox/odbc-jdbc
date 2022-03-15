@@ -280,10 +280,13 @@ public abstract class JDBC3ResultSet extends OdbcResultSet implements ResultSet 
             case Types.DOUBLE:
                 return getDouble(columnIndex);
             case Types.DATE:
+            case OdbcLibrary.SQL_DATE:
                 return getDate(columnIndex);
             case Types.TIME:
+            case OdbcLibrary.SQL_TIME:
                 return getTime(columnIndex);
             case Types.TIMESTAMP:
+            case OdbcLibrary.SQL_TIMESTAMP:
                 return getTimestamp(columnIndex);
             default:
                 throw new OdbcException("Can't determine Java type for SQL type " + type);

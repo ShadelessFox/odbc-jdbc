@@ -36,7 +36,9 @@ public interface OdbcLibrary extends Library {
     short SQL_WCHAR = -8;
     short SQL_WVARCHAR = -9;
     short SQL_WLONGVARCHAR = -10;
-
+    short SQL_DATE = 9;
+    short SQL_TIME = 10;
+    short SQL_TIMESTAMP = 11;
     short SQL_DRIVER_NOPROMPT = 0;
     short SQL_DRIVER_COMPLETE = 1;
     short SQL_DRIVER_PROMPT = 2;
